@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF Esports - Your Ultimate Wallet</title>
+    <style>
+        :root {
+            --bg-dark: #0B0E14;
+            --surface: #151A24;
+            --neon-orange: #FF6B00;
+            --neon-blue: #00B2FF;
+            --text-white: #FFFFFF;
+            --text-gray: #8A94A6;
+            --success: #00E676;
+            --error: #FF3D00;
+            --purple: #AF52DE;
+            --gold: #FFD700;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-white);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .app-container {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            background-color: var(--bg-dark);
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
+        }
+
+        .screen {
+            display: none;
+            padding: 20px;
+            flex-grow: 1;
+            box-sizing: border-box;
+            height: 100vh;
+            overflow-y: auto;
+            padding-bottom: 120px;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .btn-primary {
+            background-color: var(--success);
+            color: var(--text-white);
+            border: none;
+            padding: 14px;
+            width: 100%;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0, 230, 118, 0.3);
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
+            padding: 12px;
+            width: 100%;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .btn-danger {
+            background-color: var(--error);
+            color: white;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            box-sizing: border-box;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: var(--text-gray);
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--surface);
+            border: 1px solid rgba(0, 178, 255, 0.3);
+            color: var(--text-white);
+            border-radius: 6px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .card {
+            background-color: var(--surface);
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--neon-orange);
+            position: relative;
+        }
+
+        .nav-bar {
+            background-color: var(--surface);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            border-top: 1px solid rgba(0, 178, 255, 0.2);
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 480px;
+            box-sizing: border-box;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            color: var(--text-gray);
+            cursor: pointer;
+            font-size: 14px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .nav-item.active {
+            color: var(--neon-orange);
+        }
+
+        #splashScreen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .logo-glow {
+            font-size: 42px;
+            color: var(--neon-orange);
+            font-weight: 900;
+            text-shadow: 0 0 20px rgba(255, 107, 0, 0.6);
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .category-tabs {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background-color: var(--surface);
+            margin: 0 4px;
+            border-radius: 5px;
+            cursor: pointer;
+            color: var(--text-gray);
+        }
+
+        .tab.active {
+            background-color: rgba(0, 178, 255, 0.1);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .admin-list-item {
+            background-color: rgba(0,0,0,0.4);
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            border-left: 3px solid var(--neon-blue);
+        }
+
+        .leaderboard-box {
+            background: linear-gradient(135deg, #1e272e, #151a24);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 20px;
+        }
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 5px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 14px;
+        }
+        .rank-badge {
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .qr-container {
+            background: white;
+            padding: 10px;
+            width: 160px;
+            height: 160px;
+            margin: 15px auto;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .qr-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- 1. SPLASH SCREEN -->
+    <div id="splashScreen" class="screen active" style="display: flex;">
+        <div class="logo-glow">FF ESPORTS</div>
+        <p style="color: var(--neon-blue); font-size: 14px; letter-spacing: 1px;">LOADING SYSTEM...</p>
+    </div>
+
+    <!-- 2. LOGIN SCREEN -->
+    <div id="loginScreen" class="screen">
+        <h2 style="color: var(--neon-orange); text-align: center; margin-bottom: 25px;">Player Login</h2>
+        <div class="input-group">
+            <label>Free Fire UID:</label>
+            <input type="text" id="loginUID" placeholder="Enter your UID or 'admin'">
+        </div>
+        <div class="input-group">
+            <label>Password:</label>
+            <input type="password" id="loginPassword" placeholder="••••••••">
+        </div>
+        <button class="btn-primary" style="background-color: var(--neon-orange); box-shadow: 0 4px 10px rgba(255,107,0,0.3);" onclick="loginUser()">Login to Dashboard</button>
+        <p style="text-align: center; color: var(--text-gray); margin-top: 20px;">Don't have an account? <span style="color: var(--neon-blue); cursor: pointer; text-decoration: underline;" onclick="showScreen('registerScreen')">Sign Up</span></p>
+    </div>
+
+    <!-- 3. REGISTER SCREEN -->
+    <div id="registerScreen" class="screen">
+        <h2 style="color: var(--neon-orange); text-align: center; margin-bottom: 25px;">Create Account</h2>
+        <div class="input-group">
+            <label>In-Game Name (IGN):</label>
+            <input type="text" id="regName" placeholder="Enter IGN">
+        </div>
+        <div class="input-group">
+            <label>Free Fire UID:</label>
+            <input type="number" id="regUID" placeholder="Enter UID">
+        </div>
+        <div class="input-group">
+            <label>Password:</label>
+            <input type="password" id="regPass" placeholder="Create Password">
+        </div>
+        <button class="btn-primary" style="background-color: var(--neon-orange); box-shadow: 0 4px 10px rgba(255,107,0,0.3);" onclick="registerUser()">Sign Up</button>
+        <p style="text-align: center; color: var(--text-gray); margin-top: 20px;">Already have an account? <span style="color: var(--neon-blue); cursor: pointer; text-decoration: underline;" onclick="showScreen('loginScreen')">Login Here</span></p>
+    </div>
+
+    <!-- 4. HOME DASHBOARD SCREEN -->
+    <div id="homeScreen" class="screen">
+        <div style="background: var(--surface); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div>
+                    <div id="userGreeting" style="color: var(--text-white); font-weight: bold; font-size: 15px;">Player</div>
+                    <div style="color: var(--success); font-size: 13px; font-weight: bold; margin-top: 2px;">Coins: <span id="userCoins">0</span> 🪙</div>
+                </div>
+                <button class="btn-primary" style="width: auto; padding: 6px 12px; font-size: 12px; background: var(--success); box-shadow: none; margin: 0;" onclick="showScreen('addCoinsScreen')">+ Add Coins</button>
+            </div>
+            <!-- Send Coins to Friend Button -->
+            <button class="btn-secondary" onclick="transferCoins()">Send Coins to Friend</button>
+        </div>
+
+        <div class="leaderboard-box">
+            <h4 style="margin: 0 0 10px 0; color: var(--gold); display: flex; align-items: center; gap: 5px;">🏆 Top Players</h4>
+            <div id="playerLeaderboardList"></div>
+        </div>
+
+        <div class="category-tabs">
+            <div class="tab active" onclick="filterCategory('SOLO')">SOLO</div>
+            <div class="tab" onclick="filterCategory('DUO')">DUO</div>
+            <div class="tab" onclick="filterCategory('SQUAD')">SQUAD</div>
+        </div>
+
+        <div id="tournamentList"></div>
+    </div>
+
+    <!-- 5. WALLET DEPOSIT REQUEST SCREEN with QR -->
+    <div id="addCoinsScreen" class="screen" style="text-align: center;">
+        <h2 style="color: var(--success); margin-bottom: 5px;">Buy & Add Coins</h2>
+        <div class="qr-container">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ESPORTS_PAYMENT_QR" alt="Payment QR Code">
+        </div>
+        <div class="input-group" style="text-align: left;">
+            <label>Amount of Coins Needed:</label>
+            <input type="number" id="coinAmountRequest" placeholder="e.g. 500">
+        </div>
+        <div class="input-group" style="text-align: left;">
+            <label>Sender Mobile No / Transaction ID:</label>
+            <input type="text" id="coinTrxDetails" placeholder="Enter Transaction ID or Number">
+        </div>
+        <button class="btn-primary" onclick="submitCoinRequest()">Submit Deposit Request</button>
+        <button class="btn-secondary" style="margin-top: 12px;" onclick="showScreen('homeScreen')">Cancel</button>
+    </div>
+
+    <!-- 6. ADMIN CONTROL PANEL -->
+    <div id="adminScreen" class="screen">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="color: var(--purple); margin: 0;">Admin Panel</h2>
+            <button class="btn-danger" style="width: auto; padding: 6px 12px;" onclick="logoutAdmin()">Logout</button>
+        </div>
+
+        <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--success);">
+            <h3 style="margin-top: 0; color: var(--success);">📥 Live Payment Requests</h3>
+            <div id="adminCoinRequestsList">No pending payment requests.</div>
+        </div>
+
+        <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--purple);">
+            <h3 style="margin-top: 0; color: var(--purple);">🔑 Change Admin Password</h3>
+            <div class="input-group">
+                <label>New Password:</label>
+                <input type="password" id="newAdminPass" placeholder="Enter new admin password">
+            </div>
+            <button class="btn-primary" style="background-color: var(--purple); box-shadow: none;" onclick="changeAdminPassword()">Update Password</button>
+        </div>
+
+        <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--error);">
+            <h3 style="margin-top: 0; color: var(--error);">🚫 Player Ban / Manage System</h3>
+            <div class="input-group">
+                <label>Target Player UID:</label>
+                <input type="number" id="banTargetUID" placeholder="Enter UID to Ban/Unban">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-danger" style="flex: 1;" onclick="managePlayerStatus(true)">BAN PLAYER</button>
+                <button class="btn-primary" style="flex: 1; background-color: var(--success); box-shadow: none;" onclick="managePlayerStatus(false)">UNBAN PLAYER</button>
+            </div>
+        </div>
+
+        <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--success);">
+            <h3 style="margin-top: 0; color: var(--success);">💰 Direct Send Player Coins</h3>
+            <div class="input-group">
+                <label>Target Player UID:</label>
+                <input type="number" id="adminTargetUID" placeholder="e.g. 112233">
+            </div>
+            <div class="input-group">
+                <label>Amount of Coins to Add:</label>
+                <input type="number" id="adminCoinAmount" placeholder="e.g. 500">
+            </div>
+            <button class="btn-primary" onclick="adminAddCoins()">Add Coins Instantly</button>
+        </div>
+
+        <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid #e1b12c;">
+            <h3 style="margin-top: 0; color: #e1b12c;">⚙️ Manage Matches (Update Room ID & Slots & Delete)</h3>
+            <div id="adminTournamentList">No active matches found.</div>
+        </div>
+
+        <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 40px; border-top: 3px solid var(--neon-orange);">
+            <h3 style="margin-top: 0; color: var(--neon-orange);">🏆 Create & Launch Match</h3>
+            <div class="input-group">
+                <label>Tournament Title / Map Name:</label>
+                <input type="text" id="matchTitle" placeholder="e.g. Bermuda Solo Clash">
+            </div>
+            <div class="input-group">
+                <label>Category Type:</label>
+                <select id="matchCategory">
+                    <option value="SOLO">SOLO</option>
+                    <option value="DUO">DUO</option>
+                    <option value="SQUAD">SQUAD</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Max Slots / Players Allowed:</label>
+                <input type="number" id="matchMaxSlots" placeholder="e.g. 50" value="50">
+            </div>
+            <div class="input-group">
+                <label>Entry Fee (Coins):</label>
+                <input type="number" id="matchFee" placeholder="e.g. 20">
+            </div>
+            <div class="input-group">
+                <label>Prize Pool amount:</label>
+                <input type="text" id="matchPrize" placeholder="e.g. 600">
+            </div>
+            <div class="input-group">
+                <label>Room ID (Optional now, can add later):</label>
+                <input type="text" id="matchRoomID" placeholder="e.g. 849302 (leave blank if later)">
+            </div>
+            <div class="input-group">
+                <label>Room Password (Optional now):</label>
+                <input type="text" id="matchRoomPassword" placeholder="e.g. password123 (leave blank if later)">
+            </div>
+            <button class="btn-primary" style="background-color: var(--neon-orange); box-shadow: 0 4px 10px rgba(255,107,0,0.3);" onclick="adminCreateMatch()">Launch Tournament Live</button>
+        </div>
+    </div>
+
+    <!-- Fixed Bottom Nav Bar -->
+    <div id="mainNav" class="nav-bar" style="display: none;">
+        <div class="nav-item active" onclick="showScreen('homeScreen')">Home</div>
+        <div class="nav-item" onclick="logoutUser()">Logout</div>
+    </div>
+</div>
+
+<script>
+    let tournaments = JSON.parse(localStorage.getItem('tournamentsDB')) || [];
+    let accountsDB = JSON.parse(localStorage.getItem('accountsDB')) || {};
+    let coinRequests = JSON.parse(localStorage.getItem('coinRequestsDB')) || [];
+    let adminPass = localStorage.getItem('adminPasswordDB') || 'admin123';
+    let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    let currentCat = 'SOLO';
+
+    setTimeout(() => { showScreen('loginScreen'); }, 2000);
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+        const target = document.getElementById(screenId);
+        if(target) target.style.display = (screenId === 'splashScreen') ? 'flex' : 'block';
+        
+        const nav = document.getElementById('mainNav');
+        nav.style.display = (screenId === 'homeScreen' || screenId === 'addCoinsScreen') ? 'flex' : 'none';
+
+        if(screenId === 'homeScreen' && currentUser) {
+            document.getElementById('userCoins').innerText = accountsDB[currentUser.uid]?.coins || 0;
+            renderTournaments();
+            renderLeaderboard();
+        }
+        if(screenId === 'adminScreen') {
+            renderAdminTournaments();
+            renderCoinRequests();
+        }
+    }
+
+    function submitCoinRequest() {
+        const amount = parseInt(document.getElementById('coinAmountRequest').value);
+        const trxDetails = document.getElementById('coinTrxDetails').value.trim();
+
+        if(isNaN(amount) || amount <= 0 || !trxDetails) {
+            return alert("Please enter valid amount and transaction details!");
+        }
+
+        coinRequests.push({
+            id: Date.now(),
+            uid: currentUser.uid,
+            name: currentUser.name,
+            amount: amount,
+            trx: trxDetails
+        });
+
+        localStorage.setItem('coinRequestsDB', JSON.stringify(coinRequests));
+        alert("Deposit request submitted successfully! Admin will verify and add coins.");
+        document.getElementById('coinAmountRequest').value = '';
+        document.getElementById('coinTrxDetails').value = '';
+        showScreen('homeScreen');
+    }
+
+    function renderCoinRequests() {
+        const container = document.getElementById('adminCoinRequestsList');
+        container.innerHTML = '';
+        if(coinRequests.length === 0) {
+            container.innerHTML = 'No pending payment requests.';
+            return;
+        }
+
+        coinRequests.forEach((req, index) => {
+            container.innerHTML += `
+                <div class="admin-list-item" style="border-left-color: var(--success);">
+                    <div><b>Player:</b> ${req.name} (UID: ${req.uid})<br>
+                    <b>Requested Coins:</b> <span style="color:var(--success);">${req.amount}</span><br>
+                    <b>Trx / Number:</b> ${req.trx}</div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <button class="btn-primary" style="flex:1; padding:6px; font-size:12px; background:var(--success); box-shadow:none;" onclick="approveCoinRequest(${index})">Approve & Add</button>
+                        <button class="btn-danger" style="flex:1; padding:6px; font-size:12px; width:auto;" onclick="rejectCoinRequest(${index})">Reject</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function approveCoinRequest(index) {
+        const req = coinRequests[index];
+        if(accountsDB[req.uid]) {
+            accountsDB[req.uid].coins += req.amount;
+            localStorage.setItem('accountsDB', JSON.stringify(accountsDB));
+        }
+        coinRequests.splice(index, 1);
+        localStorage.setItem('coinRequestsDB', JSON.stringify(coinRequests));
+        alert("Request approved and coins added to player account!");
+        renderCoinRequests();
+    }
+
+    function rejectCoinRequest(index) {
+        coinRequests.splice(index, 1);
+        localStorage.setItem('coinRequestsDB', JSON.stringify(coinRequests));
+        alert("Request rejected.");
+        renderCoinRequests();
+    }
+
+    function renderLeaderboard() {
+        const list = document.getElementById('playerLeaderboardList');
+        let sortedPlayers = [];
+        for (let uid in accountsDB) {
+            if (!accountsDB[uid].banned) {
+                sortedPlayers.push({ uid: uid, name: accountsDB[uid].name, coins: accountsDB[uid].coins });
+            }
+        }
+        sortedPlayers.sort((a, b) => b.coins - a.coins);
+
+        let htmlContent = '';
+        if(sortedPlayers.length === 0) {
+            htmlContent = '<div style="color:var(--text-gray); font-size:12px;">No active players yet.</div>';
+        } else {
+            sortedPlayers.slice(0, 5).forEach((player, index) => {
+                let medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+                htmlContent += `
+                    <div class="leaderboard-item">
+                        <span><span class="rank-badge">${medal}</span>${player.name}</span>
+                        <span style="color:var(--gold); font-weight:bold;">${player.coins} 🪙</span>
+                    </div>
+                `;
+            });
+        }
+        list.innerHTML = htmlContent;
+    }
+
+    function loginUser() {
+        const uid = document.getElementById('loginUID').value.trim();
+        const pass = document.getElementById('loginPassword').value;
+
+        if(!uid || !pass) return alert("Enter UID and Password!");
+
+        if(uid.toLowerCase() === 'admin') {
+            if(pass === adminPass) {
+                showScreen('adminScreen');
+            } else {
+                alert("Invalid Admin Password!");
+            }
+            return;
+        }
+
+        if(!accountsDB[uid]) return alert("Player not found!");
+        if(accountsDB[uid].password !== pass) return alert("Incorrect password!");
+        if(accountsDB[uid].banned) return alert("Account has been banned!");
+
+        currentUser = { uid, name: accountsDB[uid].name };
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        document.getElementById('userGreeting').innerText = accountsDB[uid].name;
+        showScreen('homeScreen');
+    }
+
+    function changeAdminPassword() {
+        const newPass = document.getElementById('newAdminPass').value.trim();
+        if(!newPass) return alert("Enter a valid password!");
+        adminPass = newPass;
+        localStorage.setItem('adminPasswordDB', adminPass);
+        alert("Admin password updated!");
+        document.getElementById('newAdminPass').value = '';
+    }
+
+    function managePlayerStatus(shouldBan) {
+        const targetUID = document.getElementById('banTargetUID').value.trim();
+        if(!accountsDB[targetUID]) return alert("Player not found!");
+        accountsDB[targetUID].banned = shouldBan;
+        localStorage.setItem('accountsDB', JSON.stringify(accountsDB));
+        alert(`Player ${shouldBan ? "banned" : "unbanned"}`);
+        document.getElementById('banTargetUID').value = '';
+    }
+
+    function renderAdminTournaments() {
+        const container = document.getElementById('adminTournamentList');
+        container.innerHTML = '';
+        if(tournaments.length === 0) {
+            container.innerHTML = 'No active matches found.';
+            return;
+        }
+        tournaments.forEach((t, index) => {
+            container.innerHTML += `
+                <div class="admin-list-item">
+                    <div style="margin-bottom: 6px;"><b>${t.title}</b> (${t.category})<br>Fee: ${t.fee} | Prize: ${t.prize} | Slots: ${t.joinedPlayers.length}/${t.maxSlots}</div>
+                    <div class="input-group" style="margin-bottom:8px;">
+                        <input type="text" id="adminRoomID_${index}" placeholder="Room ID" value="${t.roomID || ''}">
+                        <input type="text" id="adminRoomPass_${index}" placeholder="Room Password" value="${t.roomPassword || ''}" style="margin-top:5px;">
+                        <input type="number" id="adminMaxSlots_${index}" placeholder="Max Slots" value="${t.maxSlots || 50}" style="margin-top:5px;">
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn-primary" style="flex:1; padding:6px; font-size:12px; background:var(--neon-blue); box-shadow:none;" onclick="updateRoomDetails(${index})">Update Details</button>
+                        <button class="btn-danger" style="flex:1; padding:6px; font-size:12px; width:auto;" onclick="deleteTournament(${index})">Delete</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function updateRoomDetails(index) {
+        const newID = document.getElementById(`adminRoomID_${index}`).value.trim();
+        const newPass = document.getElementById(`adminRoomPass_${index}`).value.trim();
+        const newSlots = parseInt(document.getElementById(`adminMaxSlots_${index}`).value);
+        
+        tournaments[index].roomID = newID;
+        tournaments[index].roomPassword = newPass;
+        if(!isNaN(newSlots) && newSlots > 0) {
+            tournaments[index].maxSlots = newSlots;
+        }
+        
+        localStorage.setItem('tournamentsDB', JSON.stringify(tournaments));
+        alert("Match details updated successfully!");
+        renderAdminTournaments();
+    }
+
+    function deleteTournament(index) {
+        const t = tournaments[index];
+        // Refund coins to all joined players
+        if(t && t.joinedPlayers && t.joinedPlayers.length > 0) {
+            t.joinedPlayers.forEach(uid => {
+                if(accountsDB[uid]) {
+                    accountsDB[uid].coins += t.fee;
+                }
+            });
+            localStorage.setItem('accountsDB', JSON.stringify(accountsDB));
+        }
+
+        tournaments.splice(index, 1);
+        localStorage.setItem('tournamentsDB', JSON.stringify(tournaments));
+        alert("Match deleted and entry fees refunded to all joined players successfully!");
+        renderAdminTournaments();
+    }
+
+    function adminAddCoins() {
+        const targetUID = document.getElementById('adminTargetUID').value.trim();
+        const amount = parseInt(document.getElementById('adminCoinAmount').value);
+        if(!accountsDB[targetUID] || isNaN(amount)) return alert("Invalid inputs!");
+        accountsDB[targetUID].coins += amount;
+        localStorage.setItem('accountsDB', JSON.stringify(accountsDB));
+        alert("Coins added successfully!");
+    }
+
+    function adminCreateMatch() {
+        const title = document.getElementById('matchTitle').value;
+        const category = document.getElementById('matchCategory').value;
+        const maxSlots = parseInt(document.getElementById('matchMaxSlots').value) || 50;
+        const fee = parseInt(document.getElementById('matchFee').value);
+        const prize = document.getElementById('matchPrize').value;
+        const roomID = document.getElementById('matchRoomID').value.trim();
+        const roomPassword = document.getElementById('matchRoomPassword').value.trim();
+
+        if(!title || isNaN(fee) || !prize) return alert("Fill all essential details!");
+
+        tournaments.push({ id: Date.now(), title, category, maxSlots, fee, prize, roomID, roomPassword, joinedPlayers: [] });
+        localStorage.setItem('tournamentsDB', JSON.stringify(tournaments));
+        alert("Match Launched!");
+        
+        document.getElementById('matchTitle').value = '';
+        document.getElementById('matchFee').value = '';
+        document.getElementById('matchPrize').value = '';
+        document.getElementById('matchRoomID').value = '';
+        document.getElementById('matchRoomPassword').value = '';
+        document.getElementById('matchMaxSlots').value = '50';
+    }
+
+    function joinMatch(id) {
+        const t = tournaments.find(x => x.id === id);
+        if(t.joinedPlayers.length >= t.maxSlots) return alert("Match is full! All slots are taken.");
+        if(accountsDB[currentUser.uid].coins < t.fee) return alert("Insufficient coins!");
+        
+        accountsDB[currentUser.uid].coins -= t.fee;
+        t.joinedPlayers.push(currentUser.uid);
+        
+        localStorage.setItem('accountsDB', JSON.stringify(accountsDB));
+        localStorage.setItem('tournamentsDB', JSON.stringify(tournaments));
+        document.getElementById('userCoins').innerText = accountsDB[currentUser.uid].coins;
+        renderTournaments();
+        renderLeaderboard();
+    }
+
+    function renderTournaments() {
+        const container = document.getElementById('tournamentList');
+        container.innerHTML = '';
+        const filtered = tournaments.filter(t => t.category === currentCat);
+        if(filtered.length === 0) {
+            container.innerHTML = '<div style="color:var(--text-gray); text-align:center; margin-top:20px;">No tournaments available in this category.</div>';
+            return;
+        }
+        filtered.forEach(t => {
+            const joined = t.joinedPlayers.includes(currentUser?.uid);
+            let roomDetailsHTML = '';
+            
+            if (joined) {
+                if (t.roomID || t.roomPassword) {
+                    roomDetailsHTML = `<div style="background:rgba(0,230,118,0.1); padding:8px; border-radius:6px; margin-top:5px;">Room ID: <b>${t.roomID || 'Pending'}</b><br>Password: <b>${t.roomPassword || 'Pending'}</b></div>`;
+                } else {
+                    roomDetailsHTML = `<div style="background:rgba(255,107,0,0.1); padding:8px; border-radius:6px; margin-top:5px; color:var(--neon-orange);">Joined! Room ID will be updated by Admin soon.</div>`;
+                }
+            } else {
+                if (t.joinedPlayers.length >= t.maxSlots) {
+                    roomDetailsHTML = `<button class="btn-danger" style="margin-top:5px; opacity:0.6; cursor:not-allowed;" disabled>Full (${t.joinedPlayers.length}/${t.maxSlots})</button>`;
+                } else {
+                    roomDetailsHTML = `<button class="btn-primary" onclick="joinMatch(${t.id})">Join (Fee: ${t.fee})</button>`;
+                }
+            }
+
+            container.innerHTML += `
+                <div class="card">
+                    <h3>${t.title}</h3>
+                    <p>Prize: ${t.prize} | Slots Filled: <b>${t.joinedPlayers.length} / ${t.maxSlots}</b></p>
+                    ${roomDetailsHTML}
+                </div>
+            `;
+        });
+    }
+
+    function filterCategory(cat) {
+        currentCat = cat;
+        document.querySelectorAll('.category-tabs .tab').forEach(t => t.classList.remove('active'));
+        if(event && event.target) {
+            event.target.classList.add('active');
+        }
+        renderTournaments();
+    }
+
+    function logoutUser() {
+        currentUser = null;
+        localStorage.removeItem('currentUser');
+        showScreen('loginScreen');
+    }
+
+    function logoutAdmin() {
+        showScreen('loginScreen');
+    }
+
+    function registerUser() {
+        const name = document.getElementById('regName').value.trim();
+        const uid = document.getElementById('regUID').value.trim();
+        const pass = document.getElementById('regPass').value;
+        if(!name || !uid || !pass) return alert("Fill all fields!");
+        if(accountsDB[uid]) return alert("UID already exists!");
+        accountsDB[uid] = { name, password: pass, coins: 0, banned: false };
+        localStorage.setItem('accountsDB', JSON.stringify(accountsDB));
+        alert("Account created!");
+        showScreen('loginScreen');
+    }
+
+    function transferCoins() {
+        if (!currentUser) return alert("Please login first!");
+
+        const friendUID = prompt("Enter Receiver's Free Fire UID:");
+        const amount = parseInt(prompt("Enter amount of coins to send:"));
+
+        if (!friendUID || !accountsDB[friendUID]) return alert("Error: Friend's UID not found!");
+        if (friendUID === currentUser.uid) return alert("You cannot send coins to yourself!");
+        if (isNaN(amount) || amount <= 0) return alert("Error: Please enter a valid amount!");
+        if (accountsDB[currentUser.uid].coins < amount) return alert("Error: Insufficient coins!");
+
+        accountsDB[currentUser.uid].coins -= amount;
+        accountsDB[friendUID].coins += amount;
+        
+        localStorage.setItem('accountsDB', JSON.stringify(accountsDB));
+        
+        document.getElementById('userCoins').innerText = accountsDB[currentUser.uid].coins;
+        alert("Successfully sent " + amount + " coins to " + friendUID);
+    }
+</script>
+
+</body>
+</html>
