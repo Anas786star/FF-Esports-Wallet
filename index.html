@@ -167,6 +167,31 @@
             margin-bottom: 10px;
         }
 
+        .login-type-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .l-tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            background-color: var(--surface);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: var(--text-gray);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .l-tab.active {
+            background-color: rgba(255, 107, 0, 0.15);
+            border-color: var(--neon-orange);
+            color: var(--neon-orange);
+        }
+
         .category-tabs {
             display: flex;
             justify-content: space-between;
@@ -304,17 +329,36 @@
 
     <!-- 2. LOGIN SCREEN -->
     <div id="loginScreen" class="screen">
-        <h2 style="color: var(--neon-orange); text-align: center; margin-bottom: 25px;">Player Login</h2>
-        <div class="input-group">
-            <label>Free Fire UID:</label>
-            <input type="text" id="loginUID" placeholder="Enter your UID or 'admin'">
+        <h2 style="color: var(--neon-orange); text-align: center; margin-bottom: 20px;">System Login</h2>
+        
+        <!-- Selection Tabs for Player & Admin -->
+        <div class="login-type-tabs">
+            <div id="playerTabBtn" class="l-tab active" onclick="switchLoginMode('player')">👤 Player Login</div>
+            <div id="adminTabBtn" class="l-tab" onclick="switchLoginMode('admin')">🔑 Admin Login</div>
         </div>
-        <div class="input-group">
-            <label>Password:</label>
-            <input type="password" id="loginPassword" placeholder="••••••••">
+
+        <!-- Player Login Fields -->
+        <div id="playerLoginForm">
+            <div class="input-group">
+                <label>Free Fire UID:</label>
+                <input type="number" id="loginUID" placeholder="Enter your UID">
+            </div>
+            <div class="input-group">
+                <label>Password:</label>
+                <input type="password" id="loginPassword" placeholder="••••••••">
+            </div>
+            <button class="btn-primary" style="background-color: var(--neon-orange); box-shadow: 0 4px 10px rgba(255,107,0,0.3);" onclick="loginUser()">Login as Player</button>
+            <p style="text-align: center; color: var(--text-gray); margin-top: 20px;">Don't have an account? <span style="color: var(--neon-blue); cursor: pointer; text-decoration: underline;" onclick="showScreen('registerScreen')">Sign Up</span></p>
         </div>
-        <button class="btn-primary" style="background-color: var(--neon-orange); box-shadow: 0 4px 10px rgba(255,107,0,0.3);" onclick="loginUser()">Login to Dashboard</button>
-        <p style="text-align: center; color: var(--text-gray); margin-top: 20px;">Don't have an account? <span style="color: var(--neon-blue); cursor: pointer; text-decoration: underline;" onclick="showScreen('registerScreen')">Sign Up</span></p>
+
+        <!-- Admin Login Fields -->
+        <div id="adminLoginForm" style="display: none;">
+            <div class="input-group">
+                <label>Admin Password:</label>
+                <input type="password" id="loginAdminPassword" placeholder="Enter admin password">
+            </div>
+            <button class="btn-primary" style="background-color: var(--purple); box-shadow: 0 4px 10px rgba(175,82,222,0.3);" onclick="loginAdmin()">Login as Admin</button>
+        </div>
     </div>
 
     <!-- 3. REGISTER SCREEN -->
@@ -344,7 +388,10 @@
                     <div id="userGreeting" style="color: var(--text-white); font-weight: bold; font-size: 15px;">Player</div>
                     <div style="color: var(--success); font-size: 13px; font-weight: bold; margin-top: 2px;">Coins: <span id="userCoins">0</span> 🪙</div>
                 </div>
-                <button class="btn-primary" style="width: auto; padding: 6px 12px; font-size: 12px; background: var(--success); box-shadow: none; margin: 0;" onclick="showScreen('addCoinsScreen')">+ Add Coins</button>
+                <div style="display: flex; gap: 6px;">
+                    <button class="btn-primary" style="width: auto; padding: 6px 10px; font-size: 11px; background: var(--success); box-shadow: none; margin: 0;" onclick="showScreen('addCoinsScreen')">+ Add</button>
+                    <button class="btn-primary" style="width: auto; padding: 6px 10px; font-size: 11px; background: var(--error); box-shadow: none; margin: 0;" onclick="showScreen('withdrawScreen')">- Withdraw</button>
+                </div>
             </div>
             <div style="display: flex; gap: 8px;">
                 <button class="btn-secondary" style="flex: 1;" onclick="transferCoins()">Send Coins</button>
@@ -419,6 +466,32 @@
         <button class="btn-secondary" style="margin-top: 12px;" onclick="showScreen('homeScreen')">Cancel</button>
     </div>
 
+    <!-- WITHDRAW SCREEN -->
+    <div id="withdrawScreen" class="screen">
+        <h2 style="color: var(--error); text-align: center; margin-bottom: 20px;">Withdraw Coins</h2>
+        <div class="input-group">
+            <label>Select Payment Method:</label>
+            <select id="withdrawMethod">
+                <option value="EasyPaisa">EasyPaisa</option>
+                <option value="JazzCash">JazzCash</option>
+            </select>
+        </div>
+        <div class="input-group">
+            <label>Account Number / Phone Number:</label>
+            <input type="text" id="withdrawAccountNum" placeholder="e.g. 03001234567">
+        </div>
+        <div class="input-group">
+            <label>Account Holder Name:</label>
+            <input type="text" id="withdrawAccountName" placeholder="Enter account title">
+        </div>
+        <div class="input-group">
+            <label>Amount of Coins to Withdraw:</label>
+            <input type="number" id="withdrawCoinsAmount" placeholder="e.g. 500">
+        </div>
+        <button class="btn-primary" style="background-color: var(--error); box-shadow: 0 4px 10px rgba(255,61,0,0.3);" onclick="submitWithdrawRequest()">Submit Withdraw Request</button>
+        <button class="btn-secondary" style="margin-top: 12px;" onclick="showScreen('homeScreen')">Back to Home</button>
+    </div>
+
     <!-- 7. CHANGE USER PASSWORD SCREEN -->
     <div id="changePasswordScreen" class="screen">
         <h2 style="color: var(--purple); text-align: center; margin-bottom: 25px;">Change Password</h2>
@@ -459,8 +532,13 @@
         </div>
 
         <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--success);">
-            <h3 style="margin-top: 0; color: var(--success);">📥 Live Payment Requests</h3>
+            <h3 style="margin-top: 0; color: var(--success);">📥 Live Payment Requests (Deposit)</h3>
             <div id="adminCoinRequestsList">No pending payment requests.</div>
+        </div>
+
+        <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--error);">
+            <h3 style="margin-top: 0; color: var(--error);">📤 Live Withdraw Requests</h3>
+            <div id="adminWithdrawRequestsList">No pending withdraw requests.</div>
         </div>
 
         <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--purple);">
@@ -485,16 +563,19 @@
         </div>
 
         <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--success);">
-            <h3 style="margin-top: 0; color: var(--success);">💰 Direct Send Player Coins</h3>
+            <h3 style="margin-top: 0; color: var(--success);">💰 Manage Player Coins (Add / Deduct)</h3>
             <div class="input-group">
                 <label>Target Player UID:</label>
                 <input type="number" id="adminTargetUID" placeholder="e.g. 112233">
             </div>
             <div class="input-group">
-                <label>Amount of Coins to Add:</label>
+                <label>Amount of Coins:</label>
                 <input type="number" id="adminCoinAmount" placeholder="e.g. 500">
             </div>
-            <button class="btn-primary" onclick="adminAddCoins()">Add Coins Instantly</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-primary" style="flex: 1; background-color: var(--success);" onclick="adminModifyCoins('add')">Add Coins</button>
+                <button class="btn-danger" style="flex: 1;" onclick="adminModifyCoins('deduct')">Deduct Coins</button>
+            </div>
         </div>
 
         <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid #e1b12c;">
@@ -551,7 +632,8 @@
     let tournaments = JSON.parse(localStorage.getItem('tournamentsDB')) || [];
     let accountsDB = JSON.parse(localStorage.getItem('accountsDB')) || {};
     let coinRequests = JSON.parse(localStorage.getItem('coinRequestsDB')) || [];
-    let adminPass = localStorage.getItem('adminPasswordDB') || 'admin123';
+    let withdrawRequests = JSON.parse(localStorage.getItem('withdrawRequestsDB')) || [];
+    let adminPass = localStorage.getItem('adminPasswordDB') || 'Anas';
     let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
     let currentCat = 'SOLO';
 
@@ -565,6 +647,25 @@
     };
 
     setTimeout(() => { showScreen('loginScreen'); }, 2000);
+
+    function switchLoginMode(mode) {
+        const playerBtn = document.getElementById('playerTabBtn');
+        const adminBtn = document.getElementById('adminTabBtn');
+        const playerForm = document.getElementById('playerLoginForm');
+        const adminForm = document.getElementById('adminLoginForm');
+
+        if(mode === 'player') {
+            playerBtn.classList.add('active');
+            adminBtn.classList.remove('active');
+            playerForm.style.display = 'block';
+            adminForm.style.display = 'none';
+        } else {
+            adminBtn.classList.add('active');
+            playerBtn.classList.remove('active');
+            adminForm.style.display = 'block';
+            playerForm.style.display = 'none';
+        }
+    }
 
     function updatePaymentUI() {
         document.getElementById('displayEpTitle').innerText = paymentConfig.epTitle;
@@ -633,7 +734,7 @@
         if(target) target.style.display = (screenId === 'splashScreen') ? 'flex' : 'block';
         
         const nav = document.getElementById('mainNav');
-        nav.style.display = (screenId === 'homeScreen' || screenId === 'addCoinsScreen' || screenId === 'changePasswordScreen') ? 'flex' : 'none';
+        nav.style.display = (screenId === 'homeScreen' || screenId === 'addCoinsScreen' || screenId === 'withdrawScreen' || screenId === 'changePasswordScreen') ? 'flex' : 'none';
 
         if(screenId === 'homeScreen' && currentUser) {
             document.getElementById('userCoins').innerText = accountsDB[currentUser.uid]?.coins || 0;
@@ -643,6 +744,7 @@
         if(screenId === 'adminScreen') {
             renderAdminTournaments();
             renderCoinRequests();
+            renderWithdrawRequests();
             loadAdminPaymentInputs();
         }
     }
@@ -670,6 +772,44 @@
         showScreen('homeScreen');
     }
 
+    function submitWithdrawRequest() {
+        if (!currentUser) return alert("Please login first!");
+        
+        const method = document.getElementById('withdrawMethod').value;
+        const accountNum = document.getElementById('withdrawAccountNum').value.trim();
+        const accountName = document.getElementById('withdrawAccountName').value.trim();
+        const amount = parseInt(document.getElementById('withdrawCoinsAmount').value);
+
+        if (!accountNum || !accountName || isNaN(amount) || amount <= 0) {
+            return alert("Please fill all withdraw fields correctly!");
+        }
+
+        if (accountsDB[currentUser.uid].coins < amount) {
+            return alert("Insufficient coins for this withdraw amount!");
+        }
+
+        accountsDB[currentUser.uid].coins -= amount;
+        localStorage.setItem('accountsDB', JSON.stringify(accountsDB));
+
+        withdrawRequests.push({
+            id: Date.now(),
+            uid: currentUser.uid,
+            name: currentUser.name,
+            method: method,
+            accountNum: accountNum,
+            accountName: accountName,
+            amount: amount
+        });
+
+        localStorage.setItem('withdrawRequestsDB', JSON.stringify(withdrawRequests));
+        alert("Withdraw request submitted successfully!");
+        
+        document.getElementById('withdrawAccountNum').value = '';
+        document.getElementById('withdrawAccountName').value = '';
+        document.getElementById('withdrawCoinsAmount').value = '';
+        showScreen('homeScreen');
+    }
+
     function renderCoinRequests() {
         const container = document.getElementById('adminCoinRequestsList');
         container.innerHTML = '';
@@ -693,6 +833,31 @@
         });
     }
 
+    function renderWithdrawRequests() {
+        const container = document.getElementById('adminWithdrawRequestsList');
+        container.innerHTML = '';
+        if(withdrawRequests.length === 0) {
+            container.innerHTML = 'No pending withdraw requests.';
+            return;
+        }
+
+        withdrawRequests.forEach((req, index) => {
+            container.innerHTML += `
+                <div class="admin-list-item" style="border-left-color: var(--error);">
+                    <div><b>Player:</b> ${req.name} (UID: ${req.uid})<br>
+                    <b>Method:</b> ${req.method}<br>
+                    <b>Account Number:</b> ${req.accountNum}<br>
+                    <b>Account Title:</b> ${req.accountName}<br>
+                    <b>Withdraw Coins:</b> <span style="color:var(--error); font-weight:bold;">${req.amount}</span></div>
+                    <div style="display: flex; gap: 8px; margin-top: 8px;">
+                        <button class="btn-primary" style="flex:1; padding:6px; font-size:12px; background:var(--success); box-shadow:none;" onclick="approveWithdrawRequest(${index})">Mark Paid / Complete</button>
+                        <button class="btn-danger" style="flex:1; padding:6px; font-size:12px; width:auto;" onclick="rejectWithdrawRequest(${index})">Reject & Refund</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
     function approveCoinRequest(index) {
         const req = coinRequests[index];
         if(accountsDB[req.uid]) {
@@ -710,6 +875,25 @@
         localStorage.setItem('coinRequestsDB', JSON.stringify(coinRequests));
         alert("Request rejected.");
         renderCoinRequests();
+    }
+
+    function approveWithdrawRequest(index) {
+        withdrawRequests.splice(index, 1);
+        localStorage.setItem('withdrawRequestsDB', JSON.stringify(withdrawRequests));
+        alert("Withdraw marked as paid and completed!");
+        renderWithdrawRequests();
+    }
+
+    function rejectWithdrawRequest(index) {
+        const req = withdrawRequests[index];
+        if(accountsDB[req.uid]) {
+            accountsDB[req.uid].coins += req.amount;
+            localStorage.setItem('accountsDB', JSON.stringify(accountsDB));
+        }
+        withdrawRequests.splice(index, 1);
+        localStorage.setItem('withdrawRequestsDB', JSON.stringify(withdrawRequests));
+        alert("Withdraw rejected and coins refunded to player account!");
+        renderWithdrawRequests();
     }
 
     function renderLeaderboard() {
@@ -745,15 +929,6 @@
 
         if(!uid || !pass) return alert("Enter UID and Password!");
 
-        if(uid.toLowerCase() === 'admin') {
-            if(pass === adminPass) {
-                showScreen('adminScreen');
-            } else {
-                alert("Invalid Admin Password!");
-            }
-            return;
-        }
-
         if(!accountsDB[uid]) return alert("Player not found!");
         if(accountsDB[uid].password !== pass) return alert("Incorrect password!");
         if(accountsDB[uid].banned) return alert("Account has been banned!");
@@ -762,6 +937,18 @@
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         document.getElementById('userGreeting').innerText = accountsDB[uid].name;
         showScreen('homeScreen');
+    }
+
+    function loginAdmin() {
+        const pass = document.getElementById('loginAdminPassword').value;
+        if(!pass) return alert("Enter admin password!");
+
+        if(pass === adminPass) {
+            document.getElementById('loginAdminPassword').value = '';
+            showScreen('adminScreen');
+        } else {
+            alert("Invalid Admin Password!");
+        }
     }
 
     function changeAdminPassword() {
@@ -861,13 +1048,25 @@
         renderAdminTournaments();
     }
 
-    function adminAddCoins() {
+    function adminModifyCoins(action) {
         const targetUID = document.getElementById('adminTargetUID').value.trim();
-        const amount = parseInt(document.getElementById('adminCoinAmount').value);
-        if(!accountsDB[targetUID] || isNaN(amount)) return alert("Invalid inputs!");
-        accountsDB[targetUID].coins += amount;
+        let amount = parseInt(document.getElementById('adminCoinAmount').value);
+        
+        if(!accountsDB[targetUID] || isNaN(amount) || amount <= 0) {
+            return alert("Please enter valid Player UID and positive amount!");
+        }
+
+        if(action === 'deduct') {
+            accountsDB[targetUID].coins -= amount;
+            alert(`Successfully deducted ${amount} coins from player ${targetUID}!`);
+        } else {
+            accountsDB[targetUID].coins += amount;
+            alert(`Successfully added ${amount} coins to player ${targetUID}!`);
+        }
+
         localStorage.setItem('accountsDB', JSON.stringify(accountsDB));
-        alert("Coins added successfully!");
+        document.getElementById('adminTargetUID').value = '';
+        document.getElementById('adminCoinAmount').value = '';
     }
 
     function adminCreateMatch() {
@@ -969,7 +1168,7 @@
         const pass = document.getElementById('regPass').value;
         if(!name || !uid || !pass) return alert("Fill all fields!");
         if(accountsDB[uid]) return alert("UID already exists!");
-        accountsDB[uid] = { name, password: pass, coins: 0,banned: false };
+        accountsDB[uid] = { name, password: pass, coins: 0, banned: false };
         localStorage.setItem('accountsDB', JSON.stringify(accountsDB));
         alert("Account created!");
         showScreen('loginScreen');
