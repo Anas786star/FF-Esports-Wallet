@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF Esports - Your Ultimate Wallet</title>
+    <title>FF Esports - Official Wallet</title>
     <style>
         :root {
             --bg-dark: #0B0E14;
@@ -16,6 +16,8 @@
             --error: #FF3D00;
             --purple: #AF52DE;
             --gold: #FFD700;
+            --easypaisa-green: #00C853;
+            --jazzcash-red: #E53935;
         }
 
         body {
@@ -218,22 +220,75 @@
             margin-right: 8px;
         }
         
-        .qr-container {
-            background: white;
-            padding: 10px;
-            width: 160px;
-            height: 160px;
-            margin: 15px auto;
+        .payment-method-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .pm-tab {
+            flex: 1;
+            padding: 12px;
             border-radius: 8px;
+            background: var(--surface);
+            color: var(--text-gray);
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.3s;
+        }
+        .pm-tab.easypaisa.active {
+            background: rgba(0, 200, 83, 0.15);
+            border: 2px solid var(--easypaisa-green);
+            color: var(--easypaisa-green);
+        }
+        .pm-tab.jazzcash.active {
+            background: rgba(229, 57, 53, 0.15);
+            border: 2px solid var(--jazzcash-red);
+            color: var(--jazzcash-red);
+        }
+
+        .qr-container {
+            background: #ffffff;
+            padding: 12px;
+            width: 220px;
+            height: 220px;
+            margin: 10px auto;
+            border-radius: 12px;
             display: flex;
             justify-content: center;
             align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+            border: 1px solid #ddd;
         }
+
         .qr-container img {
             width: 100%;
             height: 100%;
             object-fit: contain;
+        }
+
+        .account-details-box {
+            background: var(--surface);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            word-break: break-all;
+            border: 1px dashed rgba(255,255,255,0.2);
+            text-align: left;
+        }
+
+        .copy-btn {
+            background: rgba(0, 178, 255, 0.2);
+            color: var(--neon-blue);
+            border: 1px solid var(--neon-blue);
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-top: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            display: inline-block;
         }
     </style>
 </head>
@@ -291,8 +346,10 @@
                 </div>
                 <button class="btn-primary" style="width: auto; padding: 6px 12px; font-size: 12px; background: var(--success); box-shadow: none; margin: 0;" onclick="showScreen('addCoinsScreen')">+ Add Coins</button>
             </div>
-            <!-- Send Coins to Friend Button -->
-            <button class="btn-secondary" onclick="transferCoins()">Send Coins to Friend</button>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn-secondary" style="flex: 1;" onclick="transferCoins()">Send Coins</button>
+                <button class="btn-secondary" style="flex: 1; border-color: var(--purple); color: var(--purple);" onclick="showScreen('changePasswordScreen')">Change Pass</button>
+            </div>
         </div>
 
         <div class="leaderboard-box">
@@ -309,22 +366,72 @@
         <div id="tournamentList"></div>
     </div>
 
-    <!-- 5. WALLET DEPOSIT REQUEST SCREEN with QR -->
+    <!-- 5. WALLET DEPOSIT SCREEN -->
     <div id="addCoinsScreen" class="screen" style="text-align: center;">
-        <h2 style="color: var(--success); margin-bottom: 5px;">Buy & Add Coins</h2>
-        <div class="qr-container">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ESPORTS_PAYMENT_QR" alt="Payment QR Code">
+        <h2 style="color: var(--neon-blue); margin-bottom: 5px;">Buy & Add Coins</h2>
+        <p style="font-size: 13px; color: var(--text-gray); margin-top: 0; margin-bottom: 15px;">Scan official QR or copy account details below</p>
+
+        <!-- Payment Method Tabs -->
+        <div class="payment-method-tabs">
+            <div id="tabEasypaisa" class="pm-tab easypaisa active" onclick="switchQR('easypaisa')">
+                💚 EasyPaisa
+            </div>
+            <div id="tabJazzcash" class="pm-tab jazzcash" onclick="switchQR('jazzcash')">
+                ❤️ JazzCash
+            </div>
         </div>
+
+        <!-- EasyPaisa Section -->
+        <div id="easypaisaBox">
+            <div class="qr-container">
+                <img id="displayEpQR" src="" alt="EasyPaisa QR">
+            </div>
+            <div class="account-details-box">
+                <span style="color: var(--text-gray);">Account Title:</span> <b id="displayEpTitle" style="color:var(--text-white);"></b><br>
+                <span style="color: var(--text-gray);">IBAN / Account Number:</span><br>
+                <b id="displayEpIban" style="color: var(--easypaisa-green); font-size: 12px;"></b><br>
+                <button class="copy-btn" onclick="copyEpIban()">📋 Copy EasyPaisa IBAN</button>
+            </div>
+        </div>
+
+        <!-- JazzCash Section -->
+        <div id="jazzcashBox" style="display: none;">
+            <div class="qr-container">
+                <img id="displayJcQR" src="" alt="JazzCash QR">
+            </div>
+            <div class="account-details-box">
+                <span style="color: var(--text-gray);">Account Title:</span> <b id="displayJcTitle" style="color:var(--text-white);"></b><br>
+                <span style="color: var(--text-gray);">IBAN / Account Number:</span><br>
+                <b id="displayJcIban" style="color: var(--jazzcash-red); font-size: 12px;"></b><br>
+                <button class="copy-btn" onclick="copyJcIban()">📋 Copy JazzCash IBAN</button>
+            </div>
+        </div>
+
         <div class="input-group" style="text-align: left;">
             <label>Amount of Coins Needed:</label>
             <input type="number" id="coinAmountRequest" placeholder="e.g. 500">
         </div>
         <div class="input-group" style="text-align: left;">
-            <label>Sender Mobile No / Transaction ID:</label>
-            <input type="text" id="coinTrxDetails" placeholder="Enter Transaction ID or Number">
+            <label>Transaction ID (Trx ID / TID):</label>
+            <input type="text" id="coinTrxDetails" placeholder="Enter Transaction ID">
         </div>
         <button class="btn-primary" onclick="submitCoinRequest()">Submit Deposit Request</button>
         <button class="btn-secondary" style="margin-top: 12px;" onclick="showScreen('homeScreen')">Cancel</button>
+    </div>
+
+    <!-- 7. CHANGE USER PASSWORD SCREEN -->
+    <div id="changePasswordScreen" class="screen">
+        <h2 style="color: var(--purple); text-align: center; margin-bottom: 25px;">Change Password</h2>
+        <div class="input-group">
+            <label>Current Password:</label>
+            <input type="password" id="oldUserPass" placeholder="Enter current password">
+        </div>
+        <div class="input-group">
+            <label>New Password:</label>
+            <input type="password" id="newUserPass" placeholder="Enter new password">
+        </div>
+        <button class="btn-primary" style="background-color: var(--purple); box-shadow: 0 4px 10px rgba(179,82,222,0.3);" onclick="changeUserPassword()">Update Password</button>
+        <button class="btn-secondary" style="margin-top: 12px;" onclick="showScreen('homeScreen')">Back to Home</button>
     </div>
 
     <!-- 6. ADMIN CONTROL PANEL -->
@@ -332,6 +439,23 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="color: var(--purple); margin: 0;">Admin Panel</h2>
             <button class="btn-danger" style="width: auto; padding: 6px 12px;" onclick="logoutAdmin()">Logout</button>
+        </div>
+
+        <!-- QR & Payment Details Management -->
+        <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--neon-blue);">
+            <h3 style="margin-top: 0; color: var(--neon-blue);">💳 Edit QR & Payment Details</h3>
+            
+            <h4 style="color: var(--easypaisa-green); margin-bottom: 5px;">EasyPaisa Config</h4>
+            <div class="input-group"><label>Title:</label><input type="text" id="adminEpTitle"></div>
+            <div class="input-group"><label>IBAN / Number:</label><input type="text" id="adminEpIban"></div>
+            <div class="input-group"><label>QR Payload Data:</label><input type="text" id="adminEpPayload"></div>
+
+            <h4 style="color: var(--jazzcash-red); margin-bottom: 5px; margin-top: 15px;">JazzCash Config</h4>
+            <div class="input-group"><label>Title:</label><input type="text" id="adminJcTitle"></div>
+            <div class="input-group"><label>IBAN / Number:</label><input type="text" id="adminJcIban"></div>
+            <div class="input-group"><label>QR Payload Data:</label><input type="text" id="adminJcPayload"></div>
+
+            <button class="btn-primary" style="background-color: var(--neon-blue); box-shadow: none;" onclick="savePaymentConfig()">Save Payment & QR Settings</button>
         </div>
 
         <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--success);">
@@ -374,7 +498,7 @@
         </div>
 
         <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid #e1b12c;">
-            <h3 style="margin-top: 0; color: #e1b12c;">⚙️ Manage Matches (Update Room ID & Slots & Delete)</h3>
+            <h3 style="margin-top: 0; color: #e1b12c;">⚙️ Manage Matches</h3>
             <div id="adminTournamentList">No active matches found.</div>
         </div>
 
@@ -405,12 +529,12 @@
                 <input type="text" id="matchPrize" placeholder="e.g. 600">
             </div>
             <div class="input-group">
-                <label>Room ID (Optional now, can add later):</label>
-                <input type="text" id="matchRoomID" placeholder="e.g. 849302 (leave blank if later)">
+                <label>Room ID (Optional):</label>
+                <input type="text" id="matchRoomID" placeholder="e.g. 849302">
             </div>
             <div class="input-group">
-                <label>Room Password (Optional now):</label>
-                <input type="text" id="matchRoomPassword" placeholder="e.g. password123 (leave blank if later)">
+                <label>Room Password (Optional):</label>
+                <input type="text" id="matchRoomPassword" placeholder="e.g. 1234">
             </div>
             <button class="btn-primary" style="background-color: var(--neon-orange); box-shadow: 0 4px 10px rgba(255,107,0,0.3);" onclick="adminCreateMatch()">Launch Tournament Live</button>
         </div>
@@ -431,7 +555,77 @@
     let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
     let currentCat = 'SOLO';
 
+    let paymentConfig = JSON.parse(localStorage.getItem('paymentConfigDB')) || {
+        epTitle: "SHAHEEN NOOR",
+        epIban: "PK60TMFB0000000069849151",
+        epPayload: "0002020102110202000424PK60TMFB0000000069849151100468A6",
+        jcTitle: "SHAHEEN",
+        jcIban: "PK86JCMA3007923086612979",
+        jcPayload: "0002020102110202000424PK86JCMA30079230866129791004C955"
+    };
+
     setTimeout(() => { showScreen('loginScreen'); }, 2000);
+
+    function updatePaymentUI() {
+        document.getElementById('displayEpTitle').innerText = paymentConfig.epTitle;
+        document.getElementById('displayEpIban').innerText = paymentConfig.epIban;
+        document.getElementById('displayEpQR').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(paymentConfig.epPayload)}`;
+
+        document.getElementById('displayJcTitle').innerText = paymentConfig.jcTitle;
+        document.getElementById('displayJcIban').innerText = paymentConfig.jcIban;
+        document.getElementById('displayJcQR').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(paymentConfig.jcPayload)}`;
+    }
+
+    function loadAdminPaymentInputs() {
+        document.getElementById('adminEpTitle').value = paymentConfig.epTitle;
+        document.getElementById('adminEpIban').value = paymentConfig.epIban;
+        document.getElementById('adminEpPayload').value = paymentConfig.epPayload;
+
+        document.getElementById('adminJcTitle').value = paymentConfig.jcTitle;
+        document.getElementById('adminJcIban').value = paymentConfig.jcIban;
+        document.getElementById('adminJcPayload').value = paymentConfig.jcPayload;
+    }
+
+    function savePaymentConfig() {
+        paymentConfig.epTitle = document.getElementById('adminEpTitle').value.trim();
+        paymentConfig.epIban = document.getElementById('adminEpIban').value.trim();
+        paymentConfig.epPayload = document.getElementById('adminEpPayload').value.trim();
+
+        paymentConfig.jcTitle = document.getElementById('adminJcTitle').value.trim();
+        paymentConfig.jcIban = document.getElementById('adminJcIban').value.trim();
+        paymentConfig.jcPayload = document.getElementById('adminJcPayload').value.trim();
+
+        localStorage.setItem('paymentConfigDB', JSON.stringify(paymentConfig));
+        updatePaymentUI();
+        alert("Payment settings and QR codes updated successfully!");
+    }
+
+    updatePaymentUI();
+
+    function copyEpIban() {
+        navigator.clipboard.writeText(paymentConfig.epIban);
+        alert("EasyPaisa IBAN Copied!");
+    }
+
+    function copyJcIban() {
+        navigator.clipboard.writeText(paymentConfig.jcIban);
+        alert("JazzCash IBAN Copied!");
+    }
+
+    function switchQR(type) {
+        document.getElementById('tabEasypaisa').classList.remove('active');
+        document.getElementById('tabJazzcash').classList.remove('active');
+        
+        if (type === 'easypaisa') {
+            document.getElementById('tabEasypaisa').classList.add('active');
+            document.getElementById('easypaisaBox').style.display = 'block';
+            document.getElementById('jazzcashBox').style.display = 'none';
+        } else {
+            document.getElementById('tabJazzcash').classList.add('active');
+            document.getElementById('jazzcashBox').style.display = 'block';
+            document.getElementById('easypaisaBox').style.display = 'none';
+        }
+    }
 
     function showScreen(screenId) {
         document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
@@ -439,7 +633,7 @@
         if(target) target.style.display = (screenId === 'splashScreen') ? 'flex' : 'block';
         
         const nav = document.getElementById('mainNav');
-        nav.style.display = (screenId === 'homeScreen' || screenId === 'addCoinsScreen') ? 'flex' : 'none';
+        nav.style.display = (screenId === 'homeScreen' || screenId === 'addCoinsScreen' || screenId === 'changePasswordScreen') ? 'flex' : 'none';
 
         if(screenId === 'homeScreen' && currentUser) {
             document.getElementById('userCoins').innerText = accountsDB[currentUser.uid]?.coins || 0;
@@ -449,6 +643,7 @@
         if(screenId === 'adminScreen') {
             renderAdminTournaments();
             renderCoinRequests();
+            loadAdminPaymentInputs();
         }
     }
 
@@ -457,7 +652,7 @@
         const trxDetails = document.getElementById('coinTrxDetails').value.trim();
 
         if(isNaN(amount) || amount <= 0 || !trxDetails) {
-            return alert("Please enter valid amount and transaction details!");
+            return alert("Please enter valid amount and transaction details (TID)!");
         }
 
         coinRequests.push({
@@ -488,7 +683,7 @@
                 <div class="admin-list-item" style="border-left-color: var(--success);">
                     <div><b>Player:</b> ${req.name} (UID: ${req.uid})<br>
                     <b>Requested Coins:</b> <span style="color:var(--success);">${req.amount}</span><br>
-                    <b>Trx / Number:</b> ${req.trx}</div>
+                    <b>Trx / TID:</b> ${req.trx}</div>
                     <div style="display: flex; gap: 8px; margin-top: 8px;">
                         <button class="btn-primary" style="flex:1; padding:6px; font-size:12px; background:var(--success); box-shadow:none;" onclick="approveCoinRequest(${index})">Approve & Add</button>
                         <button class="btn-danger" style="flex:1; padding:6px; font-size:12px; width:auto;" onclick="rejectCoinRequest(${index})">Reject</button>
@@ -578,6 +773,27 @@
         document.getElementById('newAdminPass').value = '';
     }
 
+    function changeUserPassword() {
+        if (!currentUser) return alert("Please login first!");
+
+        const oldPass = document.getElementById('oldUserPass').value;
+        const newPass = document.getElementById('newUserPass').value.trim();
+
+        if (!oldPass || !newPass) return alert("Please fill all fields!");
+
+        if (accountsDB[currentUser.uid].password !== oldPass) {
+            return alert("Incorrect current password!");
+        }
+
+        accountsDB[currentUser.uid].password = newPass;
+        localStorage.setItem('accountsDB', JSON.stringify(accountsDB));
+
+        alert("Password changed successfully!");
+        document.getElementById('oldUserPass').value = '';
+        document.getElementById('newUserPass').value = '';
+        showScreen('homeScreen');
+    }
+
     function managePlayerStatus(shouldBan) {
         const targetUID = document.getElementById('banTargetUID').value.trim();
         if(!accountsDB[targetUID]) return alert("Player not found!");
@@ -630,7 +846,6 @@
 
     function deleteTournament(index) {
         const t = tournaments[index];
-        // Refund coins to all joined players
         if(t && t.joinedPlayers && t.joinedPlayers.length > 0) {
             t.joinedPlayers.forEach(uid => {
                 if(accountsDB[uid]) {
@@ -754,7 +969,7 @@
         const pass = document.getElementById('regPass').value;
         if(!name || !uid || !pass) return alert("Fill all fields!");
         if(accountsDB[uid]) return alert("UID already exists!");
-        accountsDB[uid] = { name, password: pass, coins: 0, banned: false };
+        accountsDB[uid] = { name, password: pass, coins: 0,banned: false };
         localStorage.setItem('accountsDB', JSON.stringify(accountsDB));
         alert("Account created!");
         showScreen('loginScreen');
@@ -768,7 +983,7 @@
 
         if (!friendUID || !accountsDB[friendUID]) return alert("Error: Friend's UID not found!");
         if (friendUID === currentUser.uid) return alert("You cannot send coins to yourself!");
-        if (isNaN(amount) || amount <= 0) return alert("Error: Please enter a valid amount!");
+        if (isNaN(amount) || amount <=0) return alert("Error: Please enter a valid amount!");
         if (accountsDB[currentUser.uid].coins < amount) return alert("Error: Insufficient coins!");
 
         accountsDB[currentUser.uid].coins -= amount;
