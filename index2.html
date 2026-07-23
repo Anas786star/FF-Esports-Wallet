@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Free Fire Max - Cyber Control Panel</title>
+    <style>
+        :root {
+            --primary-color: #00ffcc;
+            --bg-color: #0a0f1d;
+            --panel-bg: rgba(16, 23, 42, 0.9);
+            --text-color: #ffffff;
+            --accent-glow: 0 0 15px rgba(0, 255, 204, 0.4);
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 400px;
+            background: var(--panel-bg);
+            border: 2px solid var(--primary-color);
+            box-shadow: var(--accent-glow);
+            border-radius: 12px;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Login Screen Styles */
+        #login-section h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(0,255,204,0.5);
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--primary-color);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--primary-color);
+            color: #000;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: var(--accent-glow);
+            transition: 0.3s;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Dashboard Styles */
+        #dashboard-section {
+            display: none;
+        }
+
+        .header-title {
+            text-align: center;
+            color: var(--primary-color);
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(0,255,204,0.3);
+            padding-bottom: 8px;
+        }
+
+        .features-container {
+            max-height: 280px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .feature-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .feature-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        /* Switch Toggle Design */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 45px;
+            height: 22px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #333;
+            transition: .3s;
+            border-radius: 22px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(23px);
+        }
+
+        .launch-btn {
+            margin-top: 15px;
+            background: linear-gradient(45deg, #ff0055, #ff5500);
+            color: #fff;
+            box-shadow: 0 0 15px rgba(255,0,85,0.4);
+        }
+
+        .error-msg {
+            color: #ff3333;
+            font-size: 12px;
+            text-align: center;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Login Panel -->
+        <div id="login-section">
+            <h2>CYBER PANEL MAX</h2>
+            <div class="input-group">
+                <input type="text" id="licenseKey" placeholder="Enter License Key (e.g. MAXPANEL2026)">
+            </div>
+            <button class="btn" onclick="verifyKey()">ACTIVATE PANEL</button>
+            <div id="errorMsg" class="error-msg"></div>
+        </div>
+
+        <!-- Main Dashboard Panel -->
+        <div id="dashboard-section">
+            <div class="header-title">FF MAX CONTROL SYSTEM</div>
+            
+            <div class="features-container">
+                <!-- 1. Aim Lock -->
+                <div class="feature-item">
+                    <span class="feature-name">Precisão (Aim Lock)</span>
+                    <label class="switch">
+                        <input type="checkbox" onchange="toggleFeature(1, this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <!-- 2. HS Alto -->
+                <div class="feature-item">
+                    <span class="feature-name">HS Alto (Head Only)</span>
+                    <label class="switch">
+                        <input type="checkbox" onchange="toggleFeature(2, this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <!-- 3. HS Alto + Neck -->
+                <div class="feature-item">
+                    <span class="feature-name">HS Alto + Neck</span>
+                    <label class="switch">
+                        <input type="checkbox" onchange="toggleFeature(3, this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <!-- 4. HS Caveira -->
+                <div class="feature-item">
+                    <span class="feature-name">HS Caveira (Skull)</span>
+                    <label class="switch">
+                        <input type="checkbox" onchange="toggleFeature(4, this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <!-- 5. HS Neck -->
+                <div class="feature-item">
+                    <span class="feature-name">HS Neck (Legit Lock)</span>
+                    <label class="switch">
+                        <input type="checkbox" onchange="toggleFeature(5, this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <!-- 6. FOV Circle -->
+                <div class="feature-item">
+                    <span class="feature-name">Pro Mod: FOV Circle</span>
+                    <label class="switch">
+                        <input type="checkbox" onchange="toggleFeature(6, this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <!-- 7. No Recoil -->
+                <div class="feature-item">
+                    <span class="feature-name">Pro Mod: No Recoil</span>
+                    <label class="switch">
+                        <input type="checkbox" onchange="toggleFeature(7, this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+
+                <!-- 8. Aim Smoothing -->
+                <div class="feature-item">
+                    <span class="feature-name">Aim Smoothing</span>
+                    <label class="switch">
+                        <input type="checkbox" onchange="toggleFeature(8, this.checked)">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <button class="btn launch-btn" onclick="launchGame()">LAUNCH FREE FIRE MAX</button>
+        </div>
+    </div>
+
+    <script>
+        function verifyKey() {
+            const key = document.getElementById('licenseKey').value;
+            const errorMsg = document.getElementById('errorMsg');
+
+            // अगर आप Android App (WebView) में हैं, तो C++ नेटिव ब्रिज कॉल होगा
+            let isValid = false;
+            try {
+                isValid = window.MainActivity ? window.MainActivity.nativeVerifyKey(key) : (key === "MAXPANEL2026");
+            } catch(e) {
+                isValid = (key === "MAXPANEL2026");
+            }
+
+            if (isValid) {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'block';
+            } else {
+                errorMsg.innerText = "Invalid License Key! Try: MAXPANEL2026";
+            }
+        }
+
+        function toggleFeature(featureId, isEnabled) {
+            try {
+                if (window.MainActivity && window.MainActivity.nativeToggleFeature) {
+                    window.MainActivity.nativeToggleFeature(featureId, isEnabled);
+                }
+                console.log("Feature ID: " + featureId + " State: " + isEnabled);
+            } catch(e) {
+                console.error("Bridge Error: " + e);
+            }
+        }
+
+        function launchGame() {
+            alert("Free Fire Max Launching with Active Panel Configuration...");
+            try {
+                if (window.MainActivity && window.MainActivity.launchFreeFireMax) {
+                    window.MainActivity.launchFreeFireMax();
+                }
+            } catch(e) {}
+        }
+    </script>
+</body>
+</html>
