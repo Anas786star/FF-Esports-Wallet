@@ -18,6 +18,7 @@
             --gold: #FFD700;
             --easypaisa-green: #00C853;
             --jazzcash-red: #E53935;
+            --staff-color: #00E5FF;
         }
 
         body {
@@ -169,19 +170,20 @@
 
         .login-type-tabs {
             display: flex;
-            gap: 10px;
+            gap: 6px;
             margin-bottom: 20px;
         }
 
         .l-tab {
             flex: 1;
-            padding: 12px;
+            padding: 10px 4px;
             text-align: center;
             background-color: var(--surface);
             border: 1px solid rgba(255,255,255,0.1);
             border-radius: 8px;
             color: var(--text-gray);
             font-weight: bold;
+            font-size: 13px;
             cursor: pointer;
             transition: all 0.3s;
         }
@@ -331,10 +333,11 @@
     <div id="loginScreen" class="screen">
         <h2 style="color: var(--neon-orange); text-align: center; margin-bottom: 20px;">System Login</h2>
         
-        <!-- Selection Tabs for Player & Admin -->
+        <!-- Selection Tabs for Player, Staff & Admin -->
         <div class="login-type-tabs">
-            <div id="playerTabBtn" class="l-tab active" onclick="switchLoginMode('player')">👤 Player Login</div>
-            <div id="adminTabBtn" class="l-tab" onclick="switchLoginMode('admin')">🔑 Admin Login</div>
+            <div id="playerTabBtn" class="l-tab active" onclick="switchLoginMode('player')">👤 Player</div>
+            <div id="staffTabBtn" class="l-tab" onclick="switchLoginMode('staff')">🛡️ Staff</div>
+            <div id="adminTabBtn" class="l-tab" onclick="switchLoginMode('admin')">🔑 Admin</div>
         </div>
 
         <!-- Player Login Fields -->
@@ -349,6 +352,19 @@
             </div>
             <button class="btn-primary" style="background-color: var(--neon-orange); box-shadow: 0 4px 10px rgba(255,107,0,0.3);" onclick="loginUser()">Login as Player</button>
             <p style="text-align: center; color: var(--text-gray); margin-top: 20px;">Don't have an account? <span style="color: var(--neon-blue); cursor: pointer; text-decoration: underline;" onclick="showScreen('registerScreen')">Sign Up</span></p>
+        </div>
+
+        <!-- Staff Login Fields -->
+        <div id="staffLoginForm" style="display: none;">
+            <div class="input-group">
+                <label>Staff Username:</label>
+                <input type="text" id="loginStaffUser" placeholder="Enter staff username">
+            </div>
+            <div class="input-group">
+                <label>Staff Password:</label>
+                <input type="password" id="loginStaffPass" placeholder="Enter staff password">
+            </div>
+            <button class="btn-primary" style="background-color: var(--staff-color); color: #000; box-shadow: 0 4px 10px rgba(0,229,255,0.3);" onclick="loginStaff()">Login as Staff</button>
         </div>
 
         <!-- Admin Login Fields -->
@@ -514,6 +530,37 @@
             <button class="btn-danger" style="width: auto; padding: 6px 12px;" onclick="logoutAdmin()">Logout</button>
         </div>
 
+        <!-- Staff Management Section -->
+        <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--staff-color);">
+            <h3 style="margin-top: 0; color: var(--staff-color);">🛡️ Manage Staff Accounts</h3>
+            <div class="input-group">
+                <label>Staff Username:</label>
+                <input type="text" id="staffUsername" placeholder="Enter staff username">
+            </div>
+            <div class="input-group">
+                <label>Staff Password:</label>
+                <input type="text" id="staffPassword" placeholder="Enter staff password">
+            </div>
+            <button class="btn-primary" style="background-color: var(--staff-color); color: #000; box-shadow: none;" onclick="createOrUpdateStaff()">Save / Create Staff Account</button>
+            
+            <h4 style="color: var(--text-white); margin-top: 15px; margin-bottom: 5px; font-size: 14px;">Existing Staff List:</h4>
+            <div id="adminStaffList">No staff accounts found.</div>
+        </div>
+
+        <!-- Player Password Reset Section -->
+        <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--gold);">
+            <h3 style="margin-top: 0; color: var(--gold);">🔑 Reset Player Password</h3>
+            <div class="input-group">
+                <label>Target Player UID:</label>
+                <input type="number" id="resetPlayerUID" placeholder="Enter player UID">
+            </div>
+            <div class="input-group">
+                <label>New Password for Player:</label>
+                <input type="text" id="resetPlayerNewPass" placeholder="Enter new password">
+            </div>
+            <button class="btn-primary" style="background-color: var(--gold); color: #000; box-shadow: none;" onclick="adminResetPlayerPassword()">Update Player Password</button>
+        </div>
+
         <!-- QR & Payment Details Management -->
         <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--neon-blue);">
             <h3 style="margin-top: 0; color: var(--neon-blue);">💳 Edit QR & Payment Details</h3>
@@ -621,6 +668,29 @@
         </div>
     </div>
 
+    <!-- 8. STAFF CONTROL PANEL -->
+    <div id="staffScreen" class="screen">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="color: var(--staff-color); margin: 0;">Staff Dashboard</h2>
+            <button class="btn-danger" style="width: auto; padding: 6px 12px;" onclick="logoutStaff()">Logout</button>
+        </div>
+
+        <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--success);">
+            <h3 style="margin-top: 0; color: var(--success);">📥 Live Payment Requests (Deposit)</h3>
+            <div id="staffCoinRequestsList">No pending payment requests.</div>
+        </div>
+
+        <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--error);">
+            <h3 style="margin-top: 0; color: var(--error);">📤 Live Withdraw Requests</h3>
+            <div id="staffWithdrawRequestsList">No pending withdraw requests.</div>
+        </div>
+
+        <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 40px; border-top: 3px solid #e1b12c;">
+            <h3 style="margin-top: 0; color: #e1b12c;">⚙️ Manage Match Room IDs</h3>
+            <div id="staffTournamentList">No active matches found.</div>
+        </div>
+    </div>
+
     <!-- Fixed Bottom Nav Bar -->
     <div id="mainNav" class="nav-bar" style="display: none;">
         <div class="nav-item active" onclick="showScreen('homeScreen')">Home</div>
@@ -631,10 +701,12 @@
 <script>
     let tournaments = JSON.parse(localStorage.getItem('tournamentsDB')) || [];
     let accountsDB = JSON.parse(localStorage.getItem('accountsDB')) || {};
+    let staffDB = JSON.parse(localStorage.getItem('staffDB')) || {};
     let coinRequests = JSON.parse(localStorage.getItem('coinRequestsDB')) || [];
     let withdrawRequests = JSON.parse(localStorage.getItem('withdrawRequestsDB')) || [];
     let adminPass = localStorage.getItem('adminPasswordDB') || 'Anas';
     let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+    let currentStaff = JSON.parse(localStorage.getItem('currentStaff')) || null;
     let currentCat = 'SOLO';
 
     let paymentConfig = JSON.parse(localStorage.getItem('paymentConfigDB')) || {
@@ -650,20 +722,29 @@
 
     function switchLoginMode(mode) {
         const playerBtn = document.getElementById('playerTabBtn');
+        const staffBtn = document.getElementById('staffTabBtn');
         const adminBtn = document.getElementById('adminTabBtn');
+        
         const playerForm = document.getElementById('playerLoginForm');
+        const staffForm = document.getElementById('staffLoginForm');
         const adminForm = document.getElementById('adminLoginForm');
+
+        playerBtn.classList.remove('active');
+        staffBtn.classList.remove('active');
+        adminBtn.classList.remove('active');
+        playerForm.style.display = 'none';
+        staffForm.style.display = 'none';
+        adminForm.style.display = 'none';
 
         if(mode === 'player') {
             playerBtn.classList.add('active');
-            adminBtn.classList.remove('active');
             playerForm.style.display = 'block';
-            adminForm.style.display = 'none';
+        } else if(mode === 'staff') {
+            staffBtn.classList.add('active');
+            staffForm.style.display = 'block';
         } else {
             adminBtn.classList.add('active');
-            playerBtn.classList.remove('active');
             adminForm.style.display = 'block';
-            playerForm.style.display = 'none';
         }
     }
 
@@ -745,8 +826,72 @@
             renderAdminTournaments();
             renderCoinRequests();
             renderWithdrawRequests();
+            renderStaffList();
             loadAdminPaymentInputs();
         }
+        if(screenId === 'staffScreen') {
+            renderStaffTournaments();
+            renderStaffCoinRequests();
+            renderStaffWithdrawRequests();
+        }
+    }
+
+    // --- STAFF MANAGEMENT ---
+    function createOrUpdateStaff() {
+        const username = document.getElementById('staffUsername').value.trim();
+        const password = document.getElementById('staffPassword').value.trim();
+
+        if(!username || !password) return alert("Enter staff username and password!");
+        
+        staffDB[username] = { password };
+        localStorage.setItem('staffDB', JSON.stringify(staffDB));
+        alert("Staff account created/updated successfully!");
+        document.getElementById('staffUsername').value = '';
+        document.getElementById('staffPassword').value = '';
+        renderStaffList();
+    }
+
+    function renderStaffList() {
+        const container = document.getElementById('adminStaffList');
+        container.innerHTML = '';
+        const keys = Object.keys(staffDB);
+        if(keys.length === 0) {
+            container.innerHTML = '<div style="color:var(--text-gray); font-size:12px;">No staff accounts found.</div>';
+            return;
+        }
+
+        keys.forEach(username => {
+            container.innerHTML += `
+                <div style="background:rgba(0,0,0,0.3); padding:8px; border-radius:6px; margin-top:6px; display:flex; justify-content:space-between; align-items:center; font-size:13px;">
+                    <span><b>Staff:</b> ${username} (Pass: ${staffDB[username].password})</span>
+                    <button class="btn-danger" style="padding:4px 8px; font-size:11px;" onclick="deleteStaff('${username}')">Delete</button>
+                </div>
+            `;
+        });
+    }
+
+    function deleteStaff(username) {
+        if(confirm(`Are you sure you want to delete staff account: ${username}?`)) {
+            delete staffDB[username];
+            localStorage.setItem('staffDB', JSON.stringify(staffDB));
+            renderStaffList();
+            alert("Staff account deleted successfully!");
+        }
+    }
+
+    // --- PLAYER PASSWORD RESET BY ADMIN ---
+    function adminResetPlayerPassword() {
+        const uid = document.getElementById('resetPlayerUID').value.trim();
+        const newPass = document.getElementById('resetPlayerNewPass').value.trim();
+
+        if(!uid || !newPass) return alert("Enter player UID and new password!");
+        if(!accountsDB[uid]) return alert("Player UID not found!");
+
+        accountsDB[uid].password = newPass;
+        localStorage.setItem('accountsDB', JSON.stringify(accountsDB));
+        alert(`Password successfully updated for player UID: ${uid}`);
+        document.getElementById('resetPlayerUID').value = '';
+        document.getElementById('resetPlayerNewPass').value = '';
     }
 
     function submitCoinRequest() {
@@ -812,6 +957,15 @@
 
     function renderCoinRequests() {
         const container = document.getElementById('adminCoinRequestsList');
+        renderCoinListHTML(container, true);
+    }
+
+    function renderStaffCoinRequests() {
+        const container = document.getElementById('staffCoinRequestsList');
+        renderCoinListHTML(container, false);
+    }
+
+    function renderCoinListHTML(container, isAdmin) {
         container.innerHTML = '';
         if(coinRequests.length === 0) {
             container.innerHTML = 'No pending payment requests.';
@@ -825,8 +979,8 @@
                     <b>Requested Coins:</b> <span style="color:var(--success);">${req.amount}</span><br>
                     <b>Trx / TID:</b> ${req.trx}</div>
                     <div style="display: flex; gap: 8px; margin-top: 8px;">
-                        <button class="btn-primary" style="flex:1; padding:6px; font-size:12px; background:var(--success); box-shadow:none;" onclick="approveCoinRequest(${index})">Approve & Add</button>
-                        <button class="btn-danger" style="flex:1; padding:6px; font-size:12px; width:auto;" onclick="rejectCoinRequest(${index})">Reject</button>
+                        <button class="btn-primary" style="flex:1; padding:6px; font-size:12px; background:var(--success); box-shadow:none;" onclick="approveCoinRequest(${index}, ${isAdmin})">Approve & Add</button>
+                        <button class="btn-danger" style="flex:1; padding:6px; font-size:12px; width:auto;" onclick="rejectCoinRequest(${index}, ${isAdmin})">Reject</button>
                     </div>
                 </div>
             `;
@@ -835,6 +989,15 @@
 
     function renderWithdrawRequests() {
         const container = document.getElementById('adminWithdrawRequestsList');
+        renderWithdrawListHTML(container, true);
+    }
+
+    function renderStaffWithdrawRequests() {
+        const container = document.getElementById('staffWithdrawRequestsList');
+        renderWithdrawListHTML(container, false);
+    }
+
+    function renderWithdrawListHTML(container, isAdmin) {
         container.innerHTML = '';
         if(withdrawRequests.length === 0) {
             container.innerHTML = 'No pending withdraw requests.';
@@ -850,15 +1013,15 @@
                     <b>Account Title:</b> ${req.accountName}<br>
                     <b>Withdraw Coins:</b> <span style="color:var(--error); font-weight:bold;">${req.amount}</span></div>
                     <div style="display: flex; gap: 8px; margin-top: 8px;">
-                        <button class="btn-primary" style="flex:1; padding:6px; font-size:12px; background:var(--success); box-shadow:none;" onclick="approveWithdrawRequest(${index})">Mark Paid / Complete</button>
-                        <button class="btn-danger" style="flex:1; padding:6px; font-size:12px; width:auto;" onclick="rejectWithdrawRequest(${index})">Reject & Refund</button>
+                        <button class="btn-primary" style="flex:1; padding:6px; font-size:12px; background:var(--success); box-shadow:none;" onclick="approveWithdrawRequest(${index}, ${isAdmin})">Mark Paid / Complete</button>
+                        <button class="btn-danger" style="flex:1; padding:6px; font-size:12px; width:auto;" onclick="rejectWithdrawRequest(${index}, ${isAdmin})">Reject & Refund</button>
                     </div>
                 </div>
             `;
         });
     }
 
-    function approveCoinRequest(index) {
+    function approveCoinRequest(index, isAdmin) {
         const req = coinRequests[index];
         if(accountsDB[req.uid]) {
             accountsDB[req.uid].coins += req.amount;
@@ -867,24 +1030,24 @@
         coinRequests.splice(index, 1);
         localStorage.setItem('coinRequestsDB', JSON.stringify(coinRequests));
         alert("Request approved and coins added to player account!");
-        renderCoinRequests();
+        if(isAdmin) renderCoinRequests(); else renderStaffCoinRequests();
     }
 
-    function rejectCoinRequest(index) {
+    function rejectCoinRequest(index, isAdmin) {
         coinRequests.splice(index, 1);
         localStorage.setItem('coinRequestsDB', JSON.stringify(coinRequests));
         alert("Request rejected.");
-        renderCoinRequests();
+        if(isAdmin) renderCoinRequests(); else renderStaffCoinRequests();
     }
 
-    function approveWithdrawRequest(index) {
+    function approveWithdrawRequest(index, isAdmin) {
         withdrawRequests.splice(index, 1);
         localStorage.setItem('withdrawRequestsDB', JSON.stringify(withdrawRequests));
         alert("Withdraw marked as paid and completed!");
-        renderWithdrawRequests();
+        if(isAdmin) renderWithdrawRequests(); else renderStaffWithdrawRequests();
     }
 
-    function rejectWithdrawRequest(index) {
+    function rejectWithdrawRequest(index, isAdmin) {
         const req = withdrawRequests[index];
         if(accountsDB[req.uid]) {
             accountsDB[req.uid].coins += req.amount;
@@ -893,7 +1056,7 @@
         withdrawRequests.splice(index, 1);
         localStorage.setItem('withdrawRequestsDB', JSON.stringify(withdrawRequests));
         alert("Withdraw rejected and coins refunded to player account!");
-        renderWithdrawRequests();
+        if(isAdmin) renderWithdrawRequests(); else renderStaffWithdrawRequests();
     }
 
     function renderLeaderboard() {
@@ -937,6 +1100,22 @@
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         document.getElementById('userGreeting').innerText = accountsDB[uid].name;
         showScreen('homeScreen');
+    }
+
+    function loginStaff() {
+        const user = document.getElementById('loginStaffUser').value.trim();
+        const pass = document.getElementById('loginStaffPass').value.trim();
+
+        if(!user || !pass) return alert("Enter staff username and password!");
+        if(!staffDB[user] || staffDB[user].password !== pass) {
+            return alert("Invalid Staff Username or Password!");
+        }
+
+        currentStaff = { username: user };
+        localStorage.setItem('currentStaff', JSON.stringify(currentStaff));
+        document.getElementById('loginStaffUser').value = '';
+        document.getElementById('loginStaffPass').value = '';
+        showScreen('staffScreen');
     }
 
     function loginAdmin() {
@@ -992,23 +1171,32 @@
 
     function renderAdminTournaments() {
         const container = document.getElementById('adminTournamentList');
+        renderTournamentListHTML(container, true);
+    }
+
+    function renderStaffTournaments() {
+        const container = document.getElementById('staffTournamentList');
+        renderTournamentListHTML(container, false);
+    }
+
+    function renderTournamentListHTML(container, isAdmin) {
         container.innerHTML = '';
         if(tournaments.length === 0) {
             container.innerHTML = 'No active matches found.';
             return;
         }
         tournaments.forEach((t, index) => {
+            let deleteBtn = isAdmin ? `<button class="btn-danger" style="flex:1; padding:6px; font-size:12px; width:auto;" onclick="deleteTournament(${index})">Delete</button>` : '';
             container.innerHTML += `
                 <div class="admin-list-item">
                     <div style="margin-bottom: 6px;"><b>${t.title}</b> (${t.category})<br>Fee: ${t.fee} | Prize: ${t.prize} | Slots: ${t.joinedPlayers.length}/${t.maxSlots}</div>
                     <div class="input-group" style="margin-bottom:8px;">
-                        <input type="text" id="adminRoomID_${index}" placeholder="Room ID" value="${t.roomID || ''}">
-                        <input type="text" id="adminRoomPass_${index}" placeholder="Room Password" value="${t.roomPassword || ''}" style="margin-top:5px;">
-                        <input type="number" id="adminMaxSlots_${index}" placeholder="Max Slots" value="${t.maxSlots || 50}" style="margin-top:5px;">
+                        <input type="text" id="roomID_${index}" placeholder="Room ID" value="${t.roomID || ''}">
+                        <input type="text" id="roomPass_${index}" placeholder="Room Password" value="${t.roomPassword || ''}" style="margin-top:5px;">
                     </div>
                     <div style="display: flex; gap: 8px;">
-                        <button class="btn-primary" style="flex:1; padding:6px; font-size:12px; background:var(--neon-blue); box-shadow:none;" onclick="updateRoomDetails(${index})">Update Details</button>
-                        <button class="btn-danger" style="flex:1; padding:6px; font-size:12px; width:auto;" onclick="deleteTournament(${index})">Delete</button>
+                        <button class="btn-primary" style="flex:1; padding:6px; font-size:12px; background:var(--neon-blue); box-shadow:none;" onclick="updateRoomDetails(${index})">Update Room Details</button>
+                        ${deleteBtn}
                     </div>
                 </div>
             `;
@@ -1016,19 +1204,15 @@
     }
 
     function updateRoomDetails(index) {
-        const newID = document.getElementById(`adminRoomID_${index}`).value.trim();
-        const newPass = document.getElementById(`adminRoomPass_${index}`).value.trim();
-        const newSlots = parseInt(document.getElementById(`adminMaxSlots_${index}`).value);
+        const newID = document.getElementById(`roomID_${index}`).value.trim();
+        const newPass = document.getElementById(`roomPass_${index}`).value.trim();
         
         tournaments[index].roomID = newID;
         tournaments[index].roomPassword = newPass;
-        if(!isNaN(newSlots) && newSlots > 0) {
-            tournaments[index].maxSlots = newSlots;
-        }
         
         localStorage.setItem('tournamentsDB', JSON.stringify(tournaments));
         alert("Match details updated successfully!");
-        renderAdminTournaments();
+        if(currentStaff) renderStaffTournaments(); else renderAdminTournaments();
     }
 
     function deleteTournament(index) {
@@ -1123,7 +1307,7 @@
                 if (t.roomID || t.roomPassword) {
                     roomDetailsHTML = `<div style="background:rgba(0,230,118,0.1); padding:8px; border-radius:6px; margin-top:5px;">Room ID: <b>${t.roomID || 'Pending'}</b><br>Password: <b>${t.roomPassword || 'Pending'}</b></div>`;
                 } else {
-                    roomDetailsHTML = `<div style="background:rgba(255,107,0,0.1); padding:8px; border-radius:6px; margin-top:5px; color:var(--neon-orange);">Joined! Room ID will be updated by Admin soon.</div>`;
+                    roomDetailsHTML = `<div style="background:rgba(255,107,0,0.1); padding:8px; border-radius:6px; margin-top:5px; color:var(--neon-orange);">Joined! Room ID will be updated by Admin/Staff soon.</div>`;
                 }
             } else {
                 if (t.joinedPlayers.length >= t.maxSlots) {
@@ -1155,6 +1339,12 @@
     function logoutUser() {
         currentUser = null;
         localStorage.removeItem('currentUser');
+        showScreen('loginScreen');
+    }
+
+    function logoutStaff() {
+        currentStaff = null;
+        localStorage.removeItem('currentStaff');
         showScreen('loginScreen');
     }
 
@@ -1196,4 +1386,4 @@
 </script>
 
 </body>
-    </html>
+</html>
