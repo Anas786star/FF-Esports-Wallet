@@ -4,11 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FF Esports - Official Wallet</title>
-    
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
-
+    <!-- Firebase SDK (v9 Compatibility Mode for simple script integration) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
         :root {
             --bg-dark: #0B0E14;
@@ -361,6 +359,7 @@
             cursor: pointer;
         }
 
+        /* Win Mode Controller Styling */
         .admin-feature-card {
             background: #2d2d2d;
             padding: 15px;
@@ -385,7 +384,7 @@
     <!-- 1. SPLASH SCREEN -->
     <div id="splashScreen" class="screen active" style="display: flex;">
         <div class="logo-glow">FF ESPORTS</div>
-        <p style="color: var(--neon-blue); font-size: 14px; letter-spacing: 1px;">CONNECTING TO CLOUD...</p>
+        <p style="color: var(--neon-blue); font-size: 14px; letter-spacing: 1px;">LOADING SYSTEM...</p>
     </div>
 
     <!-- 2. LOGIN SCREEN -->
@@ -580,6 +579,7 @@
             <button class="btn-danger" style="width: auto; padding: 6px 12px;" onclick="logoutAdmin()">Logout</button>
         </div>
 
+        <!-- Staff Management & Full Permissions Section -->
         <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--staff-color);">
             <h3 style="margin-top: 0; color: var(--staff-color);">🛡️ Manage Staff & Full Admin Permissions</h3>
             <div class="input-group">
@@ -608,6 +608,7 @@
             <div id="adminStaffList">No staff accounts found.</div>
         </div>
 
+        <!-- Winner Prize Distribution Section -->
         <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--gold);">
             <h3 style="margin-top: 0; color: var(--gold);">🏆 Declare Winner & Send Prize Pool</h3>
             <div class="input-group">
@@ -625,6 +626,7 @@
             <button class="btn-primary" style="background-color: var(--gold); color: #000; box-shadow: none;" onclick="declareWinnerAndSendPrize()">Send Prize & Declare Winner</button>
         </div>
 
+        <!-- Player Password Reset Section -->
         <div id="adminSecPass" style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--gold);">
             <h3 style="margin-top: 0; color: var(--gold);">🔑 Reset Player Password</h3>
             <div class="input-group">
@@ -638,6 +640,7 @@
             <button class="btn-primary" style="background-color: var(--gold); color: #000; box-shadow: none;" onclick="adminResetPlayerPassword()">Update Player Password</button>
         </div>
 
+        <!-- QR & Payment Details Management -->
         <div id="adminSecPayCfg" style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--neon-blue);">
             <h3 style="margin-top: 0; color: var(--neon-blue);">💳 Edit QR & Payment Details</h3>
             
@@ -723,6 +726,7 @@
                     <option value="LONEWOLF">LONE WOLF CUSTOM</option>
                 </select>
             </div>
+            <!-- Dynamic Format Sub-Mode Selection -->
             <div class="input-group">
                 <label>Match Format / Sub-Mode:</label>
                 <select id="matchSubMode">
@@ -753,13 +757,14 @@
         </div>
     </div>
 
-    <!-- 8. STAFF CONTROL PANEL -->
+    <!-- 8. STAFF CONTROL PANEL (Dynamic based on permissions) -->
     <div id="staffScreen" class="screen">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="color: var(--staff-color); margin: 0;">Staff Dashboard</h2>
             <button class="btn-danger" style="width: auto; padding: 6px 12px;" onclick="logoutStaff()">Logout</button>
         </div>
 
+        <!-- Win Mode Controller Section (Added for Staff Panel with User Permission) -->
         <div class="admin-feature-card">
             <h3>Win Mode Controller</h3>
             <p>Status: <span id="winModeStatus" class="status-inactive">Waiting for Permission</span></p>
@@ -776,6 +781,7 @@
             <div id="staffWithdrawRequestsList">No pending withdraw requests.</div>
         </div>
 
+        <!-- Staff Winner Prize Distribution Section -->
         <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--gold);">
             <h3 style="margin-top: 0; color: var(--gold);">🏆 Declare Winner & Send Prize Pool</h3>
             <div class="input-group">
@@ -793,6 +799,7 @@
             <button class="btn-primary" style="background-color: var(--gold); color: #000; box-shadow: none;" onclick="declareWinnerAndSendPrizeStaff()">Send Prize & Declare Winner</button>
         </div>
 
+        <!-- Staff Match Management & Creation -->
         <div id="staffSectionMatches" style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid #e1b12c; display: none;">
             <h3 style="margin-top: 0; color: #e1b12c;">⚙️ Manage & Create Custom Matches</h3>
             <div class="input-group">
@@ -875,20 +882,21 @@
 </div>
 
 <script>
-    // --- FIREBASE CONFIGURATION ---
+    // --- FIREBASE INITIALIZATION ---
+    // Replace with your real Firebase config values
     const firebaseConfig = {
         apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_AUTH_DOMAIN",
-        databaseURL: "YOUR_DATABASE_URL",
+        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+        databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
         projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_STORAGE_BUCKET",
-        messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+        storageBucket: "YOUR_PROJECT_ID.appspot.com",
+        messagingSenderId: "YOUR_SENDER_ID",
         appId: "YOUR_APP_ID"
     };
-
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // In-memory global State synced with Firebase
     let tournaments = [];
     let accountsDB = {};
     let staffDB = {};
@@ -896,6 +904,10 @@
     let withdrawRequests = [];
     let winnersDB = [];
     let adminPass = 'Anas';
+    let currentUser = null;
+    let currentStaff = null;
+    let currentCat = 'SOLO';
+
     let paymentConfig = {
         epTitle: "SHAHEEN NOOR",
         epIban: "PK60TMFB0000000069849151",
@@ -905,65 +917,56 @@
         jcPayload: "0002020102110202000424PK86JCMA30079230866129791004C955"
     };
 
-    let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
-    let currentStaff = JSON.parse(localStorage.getItem('currentStaff')) || null;
-    let currentCat = 'SOLO';
-
-    // --- REAL-TIME LISTENERS FROM FIREBASE ---
-    db.ref('tournaments').on('value', (snapshot) => {
+    // Listen for Realtime Firebase Changes
+    db.ref('tournamentsDB').on('value', snapshot => {
         tournaments = snapshot.val() || [];
-        if(document.getElementById('homeScreen').style.display === 'block') renderTournaments();
-        if(document.getElementById('adminScreen').style.display === 'block') { renderAdminTournaments(); populateWinnerMatchDropdowns(); }
-        if(document.getElementById('staffScreen').style.display === 'block') { renderStaffTournaments(); populateWinnerMatchDropdowns(); }
+        if (document.getElementById('homeScreen').style.display === 'block') renderTournaments();
+        if (document.getElementById('adminScreen').style.display === 'block') renderAdminTournaments();
+        if (document.getElementById('staffScreen').style.display === 'block') renderStaffTournaments();
+        populateWinnerMatchDropdowns();
     });
 
-    db.ref('accountsDB').on('value', (snapshot) => {
+    db.ref('accountsDB').on('value', snapshot => {
         accountsDB = snapshot.val() || {};
-        if(currentUser && accountsDB[currentUser.uid]) {
-            document.getElementById('userCoins').innerText = accountsDB[currentUser.uid].coins;
+        if (currentUser && accountsDB[currentUser.uid]) {
+            currentUser = accountsDB[currentUser.uid];
+            document.getElementById('userCoins').innerText = currentUser.coins || 0;
         }
+        if (document.getElementById('homeScreen').style.display === 'block') renderLeaderboard();
     });
 
-    db.ref('staffDB').on('value', (snapshot) => {
+    db.ref('staffDB').on('value', snapshot => {
         staffDB = snapshot.val() || {};
-        if(document.getElementById('adminScreen').style.display === 'block') renderStaffList();
+        if (document.getElementById('adminScreen').style.display === 'block') renderStaffList();
     });
 
-    db.ref('coinRequestsDB').on('value', (snapshot) => {
+    db.ref('coinRequestsDB').on('value', snapshot => {
         coinRequests = snapshot.val() || [];
-        if(document.getElementById('adminScreen').style.display === 'block') renderCoinRequests();
-        if(document.getElementById('staffScreen').style.display === 'block') renderStaffCoinRequests();
+        if (document.getElementById('adminScreen').style.display === 'block') renderCoinRequests();
+        if (document.getElementById('staffScreen').style.display === 'block') renderStaffCoinRequests();
     });
 
-    db.ref('withdrawRequestsDB').on('value', (snapshot) => {
+    db.ref('withdrawRequestsDB').on('value', snapshot => {
         withdrawRequests = snapshot.val() || [];
-        if(document.getElementById('adminScreen').style.display === 'block') renderWithdrawRequests();
-        if(document.getElementById('staffScreen').style.display === 'block') renderStaffWithdrawRequests();
+        if (document.getElementById('adminScreen').style.display === 'block') renderWithdrawRequests();
+        if (document.getElementById('staffScreen').style.display === 'block') renderStaffWithdrawRequests();
     });
 
-    db.ref('winnersDB').on('value', (snapshot) => {
+    db.ref('winnersDB').on('value', snapshot => {
         winnersDB = snapshot.val() || [];
-        if(document.getElementById('homeScreen').style.display === 'block') renderLeaderboard();
+        if (document.getElementById('homeScreen').style.display === 'block') renderLeaderboard();
     });
 
-    db.ref('adminPasswordDB').on('value', (snapshot) => {
-        adminPass = snapshot.val() || 'Anas';
+    db.ref('adminPasswordDB').on('value', snapshot => {
+        if (snapshot.exists()) adminPass = snapshot.val();
     });
 
-    db.ref('paymentConfigDB').on('value', (snapshot) => {
-        if(snapshot.val()) {
-            paymentConfig = snapshot.val();
-            updatePaymentUI();
-            if(document.getElementById('adminScreen').style.display === 'block') loadAdminPaymentInputs();
-        }
+    db.ref('paymentConfigDB').on('value', snapshot => {
+        if (snapshot.exists()) paymentConfig = snapshot.val();
+        updatePaymentUI();
     });
 
-    // --- FIXED TIMEOUT: Ensures splash screen moves to login automatically ---
-    setTimeout(() => { 
-        if (document.getElementById('splashScreen').style.display !== 'none') {
-            showScreen('loginScreen'); 
-        }
-    }, 2000);
+    setTimeout(() => { showScreen('loginScreen'); }, 2000);
 
     function switchLoginMode(mode) {
         document.getElementById('playerTabBtn').classList.remove('active');
@@ -1015,6 +1018,7 @@
         paymentConfig.jcPayload = document.getElementById('adminJcPayload').value.trim();
 
         db.ref('paymentConfigDB').set(paymentConfig);
+        updatePaymentUI();
         alert("Payment settings and QR codes updated successfully!");
     }
 
@@ -1022,10 +1026,9 @@
         paymentConfig.epIban = document.getElementById('adminEpIban2').value.trim();
         paymentConfig.jcIban = document.getElementById('adminJcIban2').value.trim();
         db.ref('paymentConfigDB').set(paymentConfig);
+        updatePaymentUI();
         alert("Payment IBAN settings updated!");
     }
-
-    updatePaymentUI();
 
     function copyEpIban() {
         navigator.clipboard.writeText(paymentConfig.epIban);
@@ -1117,7 +1120,8 @@
         const cat = document.getElementById('matchCategory').value;
         const subSelect = document.getElementById('matchSubMode');
         subSelect.innerHTML = '';
-        getSubModesForCategory(cat).forEach(opt => {
+        const options = getSubModesForCategory(cat);
+        options.forEach(opt => {
             subSelect.innerHTML += `<option value="${opt.value}">${opt.label}</option>`;
         });
     }
@@ -1126,14 +1130,17 @@
         const cat = document.getElementById('staffMatchCategory').value;
         const subSelect = document.getElementById('staffMatchSubMode');
         subSelect.innerHTML = '';
-        getSubModesForCategory(cat).forEach(opt => {
+        const options = getSubModesForCategory(cat);
+        options.forEach(opt => {
             subSelect.innerHTML += `<option value="${opt.value}">${opt.label}</option>`;
         });
     }
 
     let winFeatureActive = false;
+
     function requestWinPermission() {
         let userConfirmed = confirm("Do you want to grant permission to activate the Win feature for the staff panel?");
+        
         if (userConfirmed) {
             winFeatureActive = true;
             document.getElementById("winModeStatus").innerText = "Active (Permission Granted)";
@@ -1151,11 +1158,11 @@
         if(!adminSelect && !staffSelect) return;
         
         let html = '';
-        if(!tournaments || tournaments.length === 0) {
+        if(tournaments.length === 0) {
             html = '<option value="">No matches available</option>';
         } else {
             tournaments.forEach(t => {
-                html += `<option value="${t.id}">${t.title} (${t.category})</option>`;
+                if(t) html += `<option value="${t.id}">${t.title} (${t.category})</option>`;
             });
         }
         if(adminSelect) adminSelect.innerHTML = html;
@@ -1180,12 +1187,14 @@
         if(!matchId || !uid || isNaN(prize) || prize <= 0) return alert("Please select a match, enter valid winner UID, and prize amount!");
         if(!accountsDB[uid]) return alert("Player UID not found in database!");
 
-        const match = tournaments.find(t => t.id == matchId);
+        const match = tournaments.find(t => t && t.id == matchId);
         const matchTitle = match ? match.title : "Custom Match";
 
-        accountsDB[uid].coins += prize;
-        db.ref('accountsDB').set(accountsDB);
+        // Add prize coins to winner
+        accountsDB[uid].coins = (accountsDB[uid].coins || 0) + prize;
+        db.ref('accountsDB/' + uid).set(accountsDB[uid]);
 
+        // Save to winners list
         winnersDB.unshift({
             matchTitle,
             uid,
@@ -1201,6 +1210,8 @@
         document.getElementById('winnerPrizeCoins').value = '';
         if(document.getElementById('winnerUIDStaff')) document.getElementById('winnerUIDStaff').value = '';
         if(document.getElementById('winnerPrizeCoinsStaff')) document.getElementById('winnerPrizeCoinsStaff').value = '';
+
+        renderLeaderboard();
     }
 
     function createOrUpdateStaff() {
@@ -1226,6 +1237,7 @@
         document.getElementById('staffUsername').value = '';
         document.getElementById('staffPassword').value = '';
         document.querySelectorAll('.permissions-box input').forEach(cb => cb.checked = false);
+        renderStaffList();
     }
 
     function createOrUpdateStaffFromStaff() {
@@ -1242,7 +1254,7 @@
     function renderStaffList() {
         const container = document.getElementById('adminStaffList');
         container.innerHTML = '';
-        const keys = Object.keys(staffDB || {});
+        const keys = Object.keys(staffDB);
         if(keys.length === 0) {
             container.innerHTML = '<div style="color:var(--text-gray); font-size:12px;">No staff accounts found.</div>';
             return;
@@ -1265,7 +1277,8 @@
     function deleteStaff(username) {
         if(confirm(`Are you sure you want to delete staff account: ${username}?`)) {
             delete staffDB[username];
-            db.ref('staffDB').set(staffDB);
+            db.ref('staffDB/' + username).remove();
+            renderStaffList();
             alert("Staff account deleted successfully!");
         }
     }
@@ -1290,7 +1303,7 @@
         if(!uid || !newPass) return alert("Enter player UID and new password!");
         if(!accountsDB[uid]) return alert("Player UID not found!");
         accountsDB[uid].password = newPass;
-        db.ref('accountsDB').set(accountsDB);
+        db.ref('accountsDB/' + uid).set(accountsDB[uid]);
         alert(`Password successfully updated for player UID: ${uid}`);
         document.getElementById('resetPlayerUID').value = '';
         document.getElementById('resetPlayerNewPass').value = '';
@@ -1302,319 +1315,16 @@
         if(!uid || !newPass) return alert("Enter UID and password!");
         if(!accountsDB[uid]) return alert("Player not found!");
         accountsDB[uid].password = newPass;
-        db.ref('accountsDB').set(accountsDB);
+        db.ref('accountsDB/' + uid).set(accountsDB[uid]);
         alert("Player password updated!");
         document.getElementById('resetPlayerUID2').value = '';
         document.getElementById('resetPlayerNewPass2').value = '';
-    }
-
-    function registerUser() {
-        const name = document.getElementById('regName').value.trim();
-        const uid = document.getElementById('regUID').value.trim();
-        const password = document.getElementById('regPass').value.trim();
-        if(!name || !uid || !password) return alert("Please fill all fields!");
-        if(accountsDB[uid]) return alert("An account with this UID already exists!");
-        accountsDB[uid] = { name, password, coins: 0, banned: false, joinedTournaments: [] };
-        db.ref('accountsDB').set(accountsDB);
-        alert("Account created successfully! Please login.");
-        showScreen('loginScreen');
-    }
-
-    function loginUser() {
-        const uid = document.getElementById('loginUID').value.trim();
-        const password = document.getElementById('loginPassword').value.trim();
-        if(!uid || !password) return alert("Enter UID and password!");
-        if(!accountsDB[uid]) return alert("Player UID not found!");
-        if(accountsDB[uid].banned) return alert("Your account has been banned by admin!");
-        if(accountsDB[uid].password !== password) return alert("Incorrect password!");
-        currentUser = { uid, name: accountsDB[uid].name };
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        document.getElementById('userGreeting').innerText = `${currentUser.name} (UID: ${currentUser.uid})`;
-        document.getElementById('userCoins').innerText = accountsDB[currentUser.uid].coins;
-        showScreen('homeScreen');
-    }
-
-    function logoutUser() {
-        currentUser = null;
-        localStorage.removeItem('currentUser');
-        showScreen('loginScreen');
-    }
-
-    function loginStaff() {
-        const username = document.getElementById('loginStaffUser').value.trim();
-        const password = document.getElementById('loginStaffPass').value.trim();
-        if(!username || !password) return alert("Enter staff username and password!");
-        if(!staffDB[username] || staffDB[username].password !== password) return alert("Invalid staff credentials!");
-        currentStaff = { username };
-        localStorage.setItem('currentStaff', JSON.stringify(currentStaff));
-        showScreen('staffScreen');
-    }
-
-    function logoutStaff() {
-        currentStaff = null;
-        localStorage.removeItem('currentStaff');
-        showScreen('loginScreen');
-    }
-
-    function loginAdmin() {
-        const pass = document.getElementById('loginAdminPassword').value.trim();
-        if(pass === adminPass) {
-            document.getElementById('loginAdminPassword').value = '';
-            showScreen('adminScreen');
-        } else {
-            alert("Incorrect Admin Password!");
-        }
-    }
-
-    function logoutAdmin() {
-        showScreen('loginScreen');
-    }
-
-    function changeAdminPassword() {
-        const newPass = document.getElementById('newAdminPass').value.trim();
-        if(!newPass) return alert("Enter new password!");
-        adminPass = newPass;
-        db.ref('adminPasswordDB').set(adminPass);
-        alert("Admin password updated successfully!");
-        document.getElementById('newAdminPass').value = '';
-    }
-
-    function changeUserPassword() {
-        const oldPass = document.getElementById('oldUserPass').value.trim();
-        const newPass = document.getElementById('newUserPass').value.trim();
-        if(!oldPass || !newPass) return alert("Fill all fields!");
-        if(accountsDB[currentUser.uid].password !== oldPass) return alert("Incorrect current password!");
-        accountsDB[currentUser.uid].password = newPass;
-        db.ref('accountsDB').set(accountsDB);
-        alert("Password updated successfully!");
-        showScreen('homeScreen');
-    }
-
-    function transferCoins() {
-        const targetUID = prompt("Enter Receiver Free Fire UID:");
-        if(!targetUID) return;
-        if(targetUID === currentUser.uid) return alert("You cannot send coins to yourself!");
-        if(!accountsDB[targetUID]) return alert("Receiver UID not found in database!");
-        const amount = parseInt(prompt(`Enter amount of coins to transfer to ${accountsDB[targetUID].name}:`));
-        if(isNaN(amount) || amount <= 0) return alert("Invalid amount!");
-        if(accountsDB[currentUser.uid].coins < amount) return alert("Insufficient coins!");
-        
-        accountsDB[currentUser.uid].coins -= amount;
-        accountsDB[targetUID].coins += amount;
-        db.ref('accountsDB').set(accountsDB);
-        document.getElementById('userCoins').innerText = accountsDB[currentUser.uid].coins;
-        alert(`Successfully transferred ${amount} coins to ${accountsDB[targetUID].name} (UID: ${targetUID})!`);
-    }
-
-    function managePlayerStatus(banStatus) {
-        const uid = document.getElementById('banTargetUID').value.trim();
-        if(!uid || !accountsDB[uid]) return alert("Player UID not found!");
-        accountsDB[uid].banned = banStatus;
-        db.ref('accountsDB').set(accountsDB);
-        alert(`Player UID ${uid} has been successfully ${banStatus ? 'BANNED' : 'UNBANNED'}.`);
-        document.getElementById('banTargetUID').value = '';
-    }
-
-    function adminModifyCoins(action) {
-        const uid = document.getElementById('adminTargetUID').value.trim();
-        const amount = parseInt(document.getElementById('adminCoinAmount').value);
-        modifyPlayerCoinsAction(uid, amount, action);
-    }
-
-    function adminModifyCoinsFromStaff(action) {
-        const uid = document.getElementById('adminTargetUID2').value.trim();
-        const amount = parseInt(document.getElementById('adminCoinAmount2').value);
-        modifyPlayerCoinsAction(uid, amount, action);
-    }
-
-    function modifyPlayerCoinsAction(uid, amount, action) {
-        if(!uid || !accountsDB[uid] || isNaN(amount) || amount <= 0) return alert("Enter valid UID and coin amount!");
-        if(action === 'add') {
-            accountsDB[uid].coins += amount;
-            alert(`Added ${amount} coins to player UID ${uid}`);
-        } else {
-            if(accountsDB[uid].coins < amount) return alert("Player does not have enough coins!");
-            accountsDB[uid].coins -= amount;
-            alert(`Deducted ${amount} coins from player UID ${uid}`);
-        }
-        db.ref('accountsDB').set(accountsDB);
-    }
-
-    function filterCategory(cat) {
-        currentCat = cat;
-        document.querySelectorAll('.category-tabs .tab').forEach(t => t.classList.remove('active'));
-        event.target.classList.add('active');
-        renderTournaments();
-    }
-
-    function adminCreateMatch() {
-        const title = document.getElementById('matchTitle').value.trim();
-        const category = document.getElementById('matchCategory').value;
-        const subMode = document.getElementById('matchSubMode').value;
-        const maxSlots = parseInt(document.getElementById('matchMaxSlots').value) || 50;
-        const fee = parseInt(document.getElementById('matchFee').value) || 0;
-        const prize = document.getElementById('matchPrize').value.trim() || "0";
-        const roomID = document.getElementById('matchRoomID').value.trim();
-        const roomPassword = document.getElementById('matchRoomPassword').value.trim();
-
-        if(!title) return alert("Enter match title!");
-        createTournamentMatch(title, category, subMode, maxSlots, fee, prize, roomID, roomPassword);
-    }
-
-    function staffCreateMatch() {
-        const title = document.getElementById('staffMatchTitle').value.trim();
-        const category = document.getElementById('staffMatchCategory').value;
-        const subMode = document.getElementById('staffMatchSubMode').value;
-        const maxSlots = parseInt(document.getElementById('staffMatchSlots').value) || 50;
-        const fee = parseInt(document.getElementById('staffMatchFee').value) || 0;
-        const prize = document.getElementById('staffMatchPrize').value.trim() || "0";
-
-        if(!title) return alert("Enter match title!");
-        createTournamentMatch(title, category, subMode, maxSlots, fee, prize, "", "");
-    }
-
-    function createTournamentMatch(title, category, subMode, maxSlots, fee, prize, roomID, roomPassword) {
-        if(!tournaments) tournaments = [];
-        tournaments.push({
-            id: Date.now(),
-            title,
-            category,
-            subMode,
-            maxSlots,
-            fee,
-            prize,
-            roomID: roomID || "Will update soon",
-            roomPassword: roomPassword || "Will update soon",
-            registeredPlayers: []
-        });
-        db.ref('tournaments').set(tournaments);
-        alert("Tournament match created and launched live!");
-    }
-
-    function renderTournaments() {
-        const list = document.getElementById('tournamentList');
-        list.innerHTML = '';
-        const filtered = (tournaments || []).filter(t => t.category === currentCat);
-        if(filtered.length === 0) {
-            list.innerHTML = `<div style="text-align:center; color:var(--text-gray); padding:20px;">No tournaments available for ${currentCat} mode.</div>`;
-            return;
-        }
-
-        filtered.forEach(t => {
-            const players = t.registeredPlayers || [];
-            const isJoined = currentUser && players.includes(currentUser.uid);
-            let badgeClass = 'badge-solo';
-            if(t.category === 'DUO') badgeClass = 'badge-duo';
-            else if(t.category === 'SQUAD') badgeClass = 'badge-squad';
-            else if(t.category === 'BERMUDA') badgeClass = 'badge-bermuda';
-            else if(t.category === 'CS') badgeClass = 'badge-cs';
-            else if(t.category === 'LONEWOLF') badgeClass = 'badge-lonewolf';
-
-            list.innerHTML += `
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span class="mode-badge ${badgeClass}">${t.subMode || t.category}</span>
-                        <span style="font-size: 12px; color: var(--text-gray);">Slots: ${players.length}/${t.maxSlots}</span>
-                    </div>
-                    <h3 style="margin: 6px 0; color: var(--text-white); font-size: 17px;">${t.title}</h3>
-                    <div style="font-size: 13px; color: var(--text-gray); margin-bottom: 12px; display: flex; justify-content: space-between;">
-                        <span>Entry Fee: <b style="color: var(--success);">${t.fee} Coins</b></span>
-                        <span>Prize Pool: <b style="color: var(--gold);">${t.prize}</b></span>
-                    </div>
-                    <div style="background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; font-size: 12px; margin-bottom: 10px; display: flex; justify-content: space-between;">
-                        <span>Room ID: <b style="color: var(--neon-blue);">${t.roomID}</b></span>
-                        <span>Password: <b style="color: var(--neon-orange);">${t.roomPassword}</b></span>
-                    </div>
-                    ${isJoined 
-                        ? `<button class="btn-secondary" style="background: rgba(0,230,118,0.15); border-color: var(--success); color: var(--success);" disabled>Joined Successfully</button>`
-                        : `<button class="btn-primary" onclick="joinTournament(${t.id})">Join Match (${t.fee} Coins)</button>`
-                    }
-                </div>
-            `;
-        });
-    }
-
-    function joinTournament(id) {
-        const t = tournaments.find(item => item.id == id);
-        if(!t) return;
-        if(!t.registeredPlayers) t.registeredPlayers = [];
-        if(t.registeredPlayers.length >= t.maxSlots) return alert("Match is fully booked!");
-        if(accountsDB[currentUser.uid].coins < t.fee) return alert("You don't have enough coins to join this match!");
-
-        accountsDB[currentUser.uid].coins -= t.fee;
-        db.ref('accountsDB').set(accountsDB);
-        document.getElementById('userCoins').innerText = accountsDB[currentUser.uid].coins;
-
-        t.registeredPlayers.push(currentUser.uid);
-        db.ref('tournaments').set(tournaments);
-        alert("Successfully joined the tournament match!");
-        renderTournaments();
-    }
-
-    function renderAdminTournaments() { renderMatchListHTML(document.getElementById('adminTournamentList')); }
-    function renderStaffTournaments() { renderMatchListHTML(document.getElementById('staffTournamentList')); }
-
-    function renderMatchListHTML(container) {
-        if(!container) return;
-        container.innerHTML = '';
-        if(!tournaments || tournaments.length === 0) { container.innerHTML = 'No active matches found.'; return; }
-        tournaments.forEach(t => {
-            const playersCount = t.registeredPlayers ? t.registeredPlayers.length : 0;
-            container.innerHTML += `
-                <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 13px; display:flex; justify-content:space-between; align-items:center;">
-                    <div>
-                        <b>${t.title}</b> (${t.category})<br>
-                        <span style="color:var(--text-gray); font-size:11px;">Fee: ${t.fee} | Prize: ${t.prize} | Players: ${playersCount}/${t.maxSlots}</span>
-                    </div>
-                    <button class="btn-danger" style="padding:4px 8px; font-size:11px;" onclick="deleteTournament(${t.id})">Delete</button>
-                </div>
-            `;
-        });
-    }
-
-    function deleteTournament(id) {
-        if(confirm("Are you sure you want to delete this match?")) {
-            tournaments = tournaments.filter(t => t.id != id);
-            db.ref('tournaments').set(tournaments);
-            alert("Match deleted successfully!");
-        }
-    }
-
-    function renderLeaderboard() {
-        const list = document.getElementById('playerLeaderboardList');
-        list.innerHTML = '';
-        if(!winnersDB || winnersDB.length === 0) {
-            list.innerHTML = '<div style="color:var(--text-gray); font-size:13px; text-align:center; padding:5px;">No tournament winners declared yet.</div>';
-            return;
-        }
-
-        winnersDB.slice(0, 5).forEach((w, idx) => {
-            let rankColor = 'var(--text-white)';
-            if(idx === 0) rankColor = 'var(--gold)';
-            else if(idx === 1) rankColor = '#C0C0C0';
-            else if(idx === 2) rankColor = '#CD7F32';
-
-            list.innerHTML += `
-                <div class="leaderboard-item">
-                    <div>
-                        <span class="rank-badge" style="color: ${rankColor};">#${idx+1}</span>
-                        <b>${w.name}</b> <span style="color:var(--text-gray); font-size:11px;">(UID: ${w.uid})</span><br>
-                        <span style="color:var(--neon-blue); font-size:11px;">${w.matchTitle}</span>
-                    </div>
-                    <div style="text-align: right;">
-                        <b style="color: var(--success);">+${w.prize} 🪙</b><br>
-                        <span style="color: var(--text-gray); font-size: 10px;">${w.date}</span>
-                    </div>
-                </div>
-            `;
-        });
     }
 
     function submitCoinRequest() {
         const amount = parseInt(document.getElementById('coinAmountRequest').value);
         const trxDetails = document.getElementById('coinTrxDetails').value.trim();
         if(isNaN(amount) || amount <= 0 || !trxDetails) return alert("Please enter valid amount and transaction details!");
-        if(!coinRequests) coinRequests = [];
         coinRequests.push({ id: Date.now(), uid: currentUser.uid, name: currentUser.name, amount: amount, trx: trxDetails });
         db.ref('coinRequestsDB').set(coinRequests);
         alert("Deposit request submitted successfully!");
@@ -1631,11 +1341,8 @@
         const amount = parseInt(document.getElementById('withdrawCoinsAmount').value);
         if (!accountNum || !accountName || isNaN(amount) || amount <= 0) return alert("Please fill all withdraw fields correctly!");
         if (accountsDB[currentUser.uid].coins < amount) return alert("Insufficient coins!");
-        
         accountsDB[currentUser.uid].coins -= amount;
-        db.ref('accountsDB').set(accountsDB);
-
-        if(!withdrawRequests) withdrawRequests = [];
+        db.ref('accountsDB/' + currentUser.uid).set(accountsDB[currentUser.uid]);
         withdrawRequests.push({ id: Date.now(), uid: currentUser.uid, name: currentUser.name, method, accountNum, accountName, amount });
         db.ref('withdrawRequestsDB').set(withdrawRequests);
         alert("Withdraw request submitted successfully!");
@@ -1646,75 +1353,368 @@
     function renderStaffCoinRequests() { renderCoinListHTML(document.getElementById('staffCoinRequestsList'), false); }
 
     function renderCoinListHTML(container, isAdmin) {
-        if(!container) return;
         container.innerHTML = '';
-        if(!coinRequests || coinRequests.length === 0) { container.innerHTML = 'No pending payment requests.'; return; }
+        if(coinRequests.length === 0) { container.innerHTML = 'No pending payment requests.'; return; }
         coinRequests.forEach((req, index) => {
+            if(!req) return;
             container.innerHTML += `
                 <div class="admin-list-item" style="border-left-color: var(--success);">
                     <div><b>Player:</b> ${req.name} (UID: ${req.uid})<br><b>Coins:</b> <span style="color:var(--success);">${req.amount}</span><br><b>Trx:</b> ${req.trx}</div>
                     <div style="display: flex; gap: 8px; margin-top: 8px;">
-                        <button class="btn-primary" style="flex:1; padding:6px; font-size:12px; background:var(--success); box-shadow:none;" onclick="approveCoinRequest(${index})">Approve</button>
-                        <button class="btn-danger" style="flex:1; padding:6px; font-size:12px; width:auto;" onclick="rejectCoinRequest(${index})">Reject</button>
+                        <button class="btn-primary" style="flex:1; padding:6px; font-size:12px; background:var(--success); box-shadow:none;" onclick="approveCoinRequest(${index}, ${isAdmin})">Approve</button>
+                        <button class="btn-danger" style="flex:1; padding:6px; font-size:12px; width:auto;" onclick="rejectCoinRequest(${index}, ${isAdmin})">Reject</button>
                     </div>
                 </div>
             `;
         });
     }
 
-    function approveCoinRequest(index) {
-        const req = coinRequests[index];
-        if(accountsDB[req.uid]) {
-            accountsDB[req.uid].coins += req.amount;
-            db.ref('accountsDB').set(accountsDB);
-        }
-        coinRequests.splice(index, 1);
-        db.ref('coinRequestsDB').set(coinRequests);
-        alert("Deposit request approved & coins added!");
-    }
+    function renderWithdrawRequests() { renderWithdrawListHTML(document.getElementById('adminWithdrawRequestsList'), true); }
+    function renderStaffWithdrawRequests() { renderWithdrawListHTML(document.getElementById('staffWithdrawRequestsList'), false); }
 
-    function rejectCoinRequest(index) {
-        coinRequests.splice(index, 1);
-        db.ref('coinRequestsDB').set(coinRequests);
-        alert("Deposit request rejected.");
-    }
-
-    function renderWithdrawRequests() { renderWithdrawListHTML(document.getElementById('adminWithdrawRequestsList')); }
-    function renderStaffWithdrawRequests() { renderWithdrawListHTML(document.getElementById('staffWithdrawRequestsList')); }
-
-    function renderWithdrawListHTML(container) {
-        if(!container) return;
+    function renderWithdrawListHTML(container, isAdmin) {
         container.innerHTML = '';
-        if(!withdrawRequests || withdrawRequests.length === 0) { container.innerHTML = 'No pending withdraw requests.'; return; }
+        if(withdrawRequests.length === 0) { container.innerHTML = 'No pending withdraw requests.'; return; }
         withdrawRequests.forEach((req, index) => {
+            if(!req) return;
             container.innerHTML += `
                 <div class="admin-list-item" style="border-left-color: var(--error);">
                     <div><b>Player:</b> ${req.name} (UID: ${req.uid})<br><b>Method:</b> ${req.method}<br><b>Acc:</b> ${req.accountNum} (${req.accountName})<br><b>Amount:</b> <span style="color:var(--error); font-weight:bold;">${req.amount}</span></div>
                     <div style="display: flex; gap: 8px; margin-top: 8px;">
-                        <button class="btn-primary" style="flex:1; padding:6px; font-size:12px; background:var(--success); box-shadow:none;" onclick="approveWithdrawRequest(${index})">Pay</button>
-                        <button class="btn-danger" style="flex:1; padding:6px; font-size:12px; width:auto;" onclick="rejectWithdrawRequest(${index})">Reject</button>
+                        <button class="btn-primary" style="flex:1; padding:6px; font-size:12px; background:var(--success); box-shadow:none;" onclick="approveWithdrawRequest(${index}, ${isAdmin})">Pay</button>
+                        <button class="btn-danger" style="flex:1; padding:6px; font-size:12px; width:auto;" onclick="rejectWithdrawRequest(${index}, ${isAdmin})">Reject</button>
                     </div>
                 </div>
             `;
         });
     }
 
-    function approveWithdrawRequest(index) {
-        withdrawRequests.splice(index, 1);
-        db.ref('withdrawRequestsDB').set(withdrawRequests);
-        alert("Withdrawal marked as paid!");
+    function approveCoinRequest(index, isAdmin) {
+        const req = coinRequests[index];
+        if (req && accountsDB[req.uid]) {
+            accountsDB[req.uid].coins = (accountsDB[req.uid].coins || 0) + req.amount;
+            db.ref('accountsDB/' + req.uid).set(accountsDB[req.uid]);
+        }
+        coinRequests.splice(index, 1);
+        db.ref('coinRequestsDB').set(coinRequests);
+        if(isAdmin) renderCoinRequests(); else renderStaffCoinRequests();
+        alert("Deposit request approved!");
     }
 
-    function rejectWithdrawRequest(index) {
+    function rejectCoinRequest(index, isAdmin) {
+        coinRequests.splice(index, 1);
+        db.ref('coinRequestsDB').set(coinRequests);
+        if(isAdmin) renderCoinRequests(); else renderStaffCoinRequests();
+        alert("Deposit request rejected!");
+    }
+
+    function approveWithdrawRequest(index, isAdmin) {
+        withdrawRequests.splice(index, 1);
+        db.ref('withdrawRequestsDB').set(withdrawRequests);
+        if(isAdmin) renderWithdrawRequests(); else renderStaffWithdrawRequests();
+        alert("Withdraw marked as paid!");
+    }
+
+    function rejectWithdrawRequest(index, isAdmin) {
         const req = withdrawRequests[index];
-        if(accountsDB[req.uid]) {
+        if (req && accountsDB[req.uid]) {
             accountsDB[req.uid].coins += req.amount;
-            db.ref('accountsDB').set(accountsDB);
+            db.ref('accountsDB/' + req.uid).set(accountsDB[req.uid]);
         }
         withdrawRequests.splice(index, 1);
         db.ref('withdrawRequestsDB').set(withdrawRequests);
-        alert("Withdrawal rejected & coins refunded to player.");
+        if(isAdmin) renderWithdrawRequests(); else renderStaffWithdrawRequests();
+        alert("Withdraw rejected and coins refunded!");
+    }
+
+    function registerUser() {
+        const name = document.getElementById('regName').value.trim();
+        const uid = document.getElementById('regUID').value.trim();
+        const pass = document.getElementById('regPass').value.trim();
+        if(!name || !uid || !pass) return alert("Fill all fields!");
+        if(accountsDB[uid]) return alert("UID already registered!");
+        accountsDB[uid] = { name, uid, password: pass, coins: 0, isBanned: false };
+        db.ref('accountsDB/' + uid).set(accountsDB[uid]);
+        alert("Account created!");
+        showScreen('loginScreen');
+    }
+
+    function loginUser() {
+        const uid = document.getElementById('loginUID').value.trim();
+        const pass = document.getElementById('loginPassword').value.trim();
+        if(!accountsDB[uid] || accountsDB[uid].password !== pass) return alert("Invalid credentials!");
+        if(accountsDB[uid].isBanned) return alert("Your account has been banned!");
+        currentUser = accountsDB[uid];
+        document.getElementById('userGreeting').innerText = currentUser.name;
+        showScreen('homeScreen');
+    }
+
+    function loginStaff() {
+        const user = document.getElementById('loginStaffUser').value.trim();
+        const pass = document.getElementById('loginStaffPass').value.trim();
+        if(staffDB[user] && staffDB[user].password === pass) {
+            currentStaff = { username: user };
+            showScreen('staffScreen');
+        } else {
+            alert("Invalid staff details!");
+        }
+    }
+
+    function loginAdmin() {
+        const pass = document.getElementById('loginAdminPassword').value.trim();
+        if(pass === adminPass) showScreen('adminScreen');
+        else alert("Incorrect Admin Password!");
+    }
+
+    function logoutUser() { currentUser = null; showScreen('loginScreen'); }
+    function logoutStaff() { currentStaff = null; showScreen('loginScreen'); }
+    function logoutAdmin() { showScreen('loginScreen'); }
+
+    function filterCategory(cat) {
+        currentCat = cat;
+        document.querySelectorAll('.category-tabs .tab').forEach(t => {
+            t.classList.toggle('active', t.innerText === cat || (cat==='CS' && t.innerText==='CLASH SQUAD') || (cat==='LONEWOLF' && t.innerText==='LONE WOLF'));
+        });
+        renderTournaments();
+    }
+
+    function renderTournaments() {
+        const container = document.getElementById('tournamentList');
+        container.innerHTML = '';
+        const list = tournaments.filter(t => t && t.category === currentCat);
+        if(list.length === 0) {
+            container.innerHTML = '<div style="text-align:center; color:var(--text-gray); margin-top:20px;">No tournaments available in this category.</div>';
+            return;
+        }
+
+        list.forEach(t => {
+            const joined = t.joinedPlayers && t.joinedPlayers.includes(currentUser?.uid);
+            container.innerHTML += `
+                <div class="card">
+                    <span class="mode-badge badge-${t.category.toLowerCase()}">${t.subMode || t.category}</span>
+                    <h3 style="margin:0 0 8px 0; color:var(--text-white);">${t.title}</h3>
+                    <div style="font-size:13px; color:var(--text-gray); margin-bottom:10px;">
+                        <span>Prize: <b style="color:var(--gold);">${t.prize}</b></span> | 
+                        <span>Fee: <b style="color:var(--success);">${t.fee} Coins</b></span><br>
+                        <span>Slots: <b>${(t.joinedPlayers || []).length}/${t.maxSlots}</b></span>
+                    </div>
+                    ${joined ? `
+                        <div style="background:rgba(0,178,255,0.1); padding:8px; border-radius:6px; font-size:12px; margin-bottom:10px;">
+                            <div>Room ID: <b style="color:var(--neon-blue);">${t.roomId || 'Waiting...'}</b></div>
+                            <div>Password: <b style="color:var(--neon-blue);">${t.roomPassword || 'Waiting...'}</b></div>
+                        </div>
+                    ` : ''}
+                    <button class="btn-primary" style="${joined ? 'background:var(--surface); border:1px solid var(--success); color:var(--success);' : ''}" onclick="joinTournament(${t.id})">
+                        ${joined ? 'JOINED' : 'JOIN MATCH'}
+                    </button>
+                </div>
+            `;
+        });
+    }
+
+    function joinTournament(id) {
+        const t = tournaments.find(x => x && x.id === id);
+        if(!t) return;
+        if(!t.joinedPlayers) t.joinedPlayers = [];
+        if(t.joinedPlayers.includes(currentUser.uid)) return alert("You are already joined!");
+        if(t.joinedPlayers.length >= t.maxSlots) return alert("Tournament is full!");
+        if(accountsDB[currentUser.uid].coins < t.fee) return alert("Insufficient coins!");
+
+        accountsDB[currentUser.uid].coins -= t.fee;
+        t.joinedPlayers.push(currentUser.uid);
+        
+        db.ref('accountsDB/' + currentUser.uid).set(accountsDB[currentUser.uid]);
+        db.ref('tournamentsDB').set(tournaments);
+        
+        showScreen('homeScreen');
+        alert("Successfully joined tournament!");
+    }
+
+    function adminCreateMatch() {
+        const title = document.getElementById('matchTitle').value.trim();
+        const cat = document.getElementById('matchCategory').value;
+        const subMode = document.getElementById('matchSubMode').value;
+        const maxSlots = parseInt(document.getElementById('matchMaxSlots').value) || 50;
+        const fee = parseInt(document.getElementById('matchFee').value) || 0;
+        const prize = document.getElementById('matchPrize').value.trim();
+        const roomId = document.getElementById('matchRoomID').value.trim();
+        const roomPassword = document.getElementById('matchRoomPassword').value.trim();
+
+        if(!title) return alert("Enter match title!");
+
+        tournaments.push({
+            id: Date.now(),
+            title, category: cat, subMode, maxSlots, fee, prize, roomId, roomPassword,
+            joinedPlayers: []
+        });
+
+        db.ref('tournamentsDB').set(tournaments);
+        alert("Match launched successfully!");
+        renderAdminTournaments();
+        populateWinnerMatchDropdowns();
+    }
+
+    function staffCreateMatch() {
+        const title = document.getElementById('staffMatchTitle').value.trim();
+        const cat = document.getElementById('staffMatchCategory').value;
+        const subMode = document.getElementById('staffMatchSubMode').value;
+        const maxSlots = parseInt(document.getElementById('staffMatchSlots').value) || 50;
+        const fee = parseInt(document.getElementById('staffMatchFee').value) || 0;
+        const prize = document.getElementById('staffMatchPrize').value.trim();
+
+        if(!title) return alert("Enter match title!");
+
+        tournaments.push({
+            id: Date.now(),
+            title, category: cat, subMode, maxSlots, fee, prize, roomId:'', roomPassword:'',
+            joinedPlayers: []
+        });
+
+        db.ref('tournamentsDB').set(tournaments);
+        alert("Match launched by staff!");
+        renderStaffTournaments();
+        populateWinnerMatchDropdowns();
+    }
+
+    function renderAdminTournaments() { renderTournamentsListHTML(document.getElementById('adminTournamentList'), true); }
+    function renderStaffTournaments() { renderTournamentsListHTML(document.getElementById('staffTournamentList'), false); }
+
+    function renderTournamentsListHTML(container, isAdmin) {
+        container.innerHTML = '';
+        if(tournaments.length === 0) { container.innerHTML = 'No active matches.'; return; }
+        tournaments.forEach(t => {
+            if(!t) return;
+            container.innerHTML += `
+                <div class="admin-list-item" style="border-left-color: var(--gold);">
+                    <div><b>${t.title}</b> (${t.subMode || t.category})<br>Players: ${(t.joinedPlayers||[]).length}/${t.maxSlots}</div>
+                    <div style="margin-top:6px; display:flex; gap:6px;">
+                        <input type="text" placeholder="Room ID" id="rid_${t.id}" value="${t.roomId||''}" style="padding:4px; font-size:11px; flex:1; background:var(--surface); color:#fff; border:1px solid #444; border-radius:4px;">
+                        <input type="text" placeholder="Pass" id="rpass_${t.id}" value="${t.roomPassword||''}" style="padding:4px; font-size:11px; flex:1; background:var(--surface); color:#fff; border:1px solid #444; border-radius:4px;">
+                        <button class="btn-primary" style="padding:4px 8px; font-size:11px; width:auto; margin:0;" onclick="updateRoomInfo(${t.id}, ${isAdmin})">Save</button>
+                        <button class="btn-danger" style="padding:4px 8px; font-size:11px; width:auto;" onclick="deleteMatch(${t.id}, ${isAdmin})">X</button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function updateRoomInfo(id, isAdmin) {
+        const t = tournaments.find(x => x && x.id === id);
+        if(t) {
+            t.roomId = document.getElementById(`rid_${id}`).value.trim();
+            t.roomPassword = document.getElementById(`rpass_${id}`).value.trim();
+            db.ref('tournamentsDB').set(tournaments);
+            alert("Room details updated!");
+        }
+    }
+
+    function deleteMatch(id, isAdmin) {
+        tournaments = tournaments.filter(x => x && x.id !== id);
+        db.ref('tournamentsDB').set(tournaments);
+        if(isAdmin) renderAdminTournaments(); else renderStaffTournaments();
+        populateWinnerMatchDropdowns();
+    }
+
+    function transferCoins() {
+        const targetUID = prompt("Enter Receiver Player UID:");
+        if(!targetUID || !accountsDB[targetUID]) return alert("Invalid Player UID!");
+        if(targetUID === currentUser.uid) return alert("Cannot send coins to yourself!");
+        
+        const amount = parseInt(prompt("Enter Amount of Coins to Send:"));
+        if(isNaN(amount) || amount <= 0) return alert("Invalid Amount!");
+        if(accountsDB[currentUser.uid].coins < amount) return alert("Insufficient Coins!");
+
+        accountsDB[currentUser.uid].coins -= amount;
+        accountsDB[targetUID].coins = (accountsDB[targetUID].coins || 0) + amount;
+        
+        db.ref('accountsDB/' + currentUser.uid).set(accountsDB[currentUser.uid]);
+        db.ref('accountsDB/' + targetUID).set(accountsDB[targetUID]);
+
+        document.getElementById('userCoins').innerText = accountsDB[currentUser.uid].coins;
+        alert(`Successfully transferred ${amount} coins to ${accountsDB[targetUID].name}!`);
+    }
+
+    function changeUserPassword() {
+        const oldPass = document.getElementById('oldUserPass').value.trim();
+        const newPass = document.getElementById('newUserPass').value.trim();
+        if(oldPass !== currentUser.password) return alert("Incorrect current password!");
+        if(!newPass) return alert("Enter a valid new password!");
+
+        currentUser.password = newPass;
+        accountsDB[currentUser.uid].password = newPass;
+        db.ref('accountsDB/' + currentUser.uid).set(accountsDB[currentUser.uid]);
+        alert("Password updated successfully!");
+        showScreen('homeScreen');
+    }
+
+    function changeAdminPassword() {
+        const newPass = document.getElementById('newAdminPass').value.trim();
+        if(!newPass) return alert("Enter valid password!");
+        adminPass = newPass;
+        db.ref('adminPasswordDB').set(adminPass);
+        alert("Admin password changed successfully!");
+    }
+
+    function managePlayerStatus(ban) {
+        const uid = document.getElementById('banTargetUID').value.trim();
+        if(!accountsDB[uid]) return alert("Player UID not found!");
+        accountsDB[uid].isBanned = ban;
+        db.ref('accountsDB/' + uid).set(accountsDB[uid]);
+        alert(`Player UID ${uid} has been ${ban ? 'BANNED' : 'UNBANNED'} successfully!`);
+    }
+
+    function adminModifyCoins(type) {
+        const uid = document.getElementById('adminTargetUID').value.trim();
+        const amount = parseInt(document.getElementById('adminCoinAmount').value);
+        if(!accountsDB[uid]) return alert("Player UID not found!");
+        if(isNaN(amount) || amount <= 0) return alert("Enter valid coin amount!");
+
+        if(type === 'add') accountsDB[uid].coins = (accountsDB[uid].coins || 0) + amount;
+        else accountsDB[uid].coins = Math.max(0, (accountsDB[uid].coins || 0) - amount);
+
+        db.ref('accountsDB/' + uid).set(accountsDB[uid]);
+        alert(`Successfully ${type === 'add' ? 'added' : 'deducted'} ${amount} coins for UID: ${uid}`);
+    }
+
+    function adminModifyCoinsFromStaff(type) {
+        const uid = document.getElementById('adminTargetUID2').value.trim();
+        const amount = parseInt(document.getElementById('adminCoinAmount2').value);
+        if(!accountsDB[uid]) return alert("Player UID not found!");
+        if(isNaN(amount) || amount <= 0) return alert("Enter valid amount!");
+
+        if(type === 'add') accountsDB[uid].coins = (accountsDB[uid].coins || 0) + amount;
+        else accountsDB[uid].coins = Math.max(0, (accountsDB[uid].coins || 0) - amount);
+
+        db.ref('accountsDB/' + uid).set(accountsDB[uid]);
+        alert(`Coins updated for UID: ${uid}`);
+    }
+
+    function renderLeaderboard() {
+        const container = document.getElementById('playerLeaderboardList');
+        container.innerHTML = '';
+        
+        if(winnersDB.length === 0) {
+            container.innerHTML = '<div style="color:var(--text-gray); font-size:12px; text-align:center;">No recent match winners announced yet.</div>';
+            return;
+        }
+
+        winnersDB.slice(0, 5).forEach((w, index) => {
+            if(!w) return;
+            const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🎗️';
+            container.innerHTML += `
+                <div class="leaderboard-item">
+                    <div>
+                        <span class="rank-badge">${medal}</span>
+                        <b>${w.name}</b> <span style="font-size:11px; color:var(--text-gray);">(UID: ${w.uid})</span>
+                    </div>
+                    <div style="color:var(--gold); font-weight:bold;">
+                        +${w.prize} 🪙
+                    </div>
+                </div>
+            `;
+        });
     }
 </script>
+
 </body>
 </html>
