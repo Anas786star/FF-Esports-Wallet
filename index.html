@@ -359,7 +359,6 @@
             cursor: pointer;
         }
 
-        /* Win Mode Controller Styling */
         .admin-feature-card {
             background: #2d2d2d;
             padding: 15px;
@@ -726,7 +725,6 @@
                     <option value="LONEWOLF">LONE WOLF CUSTOM</option>
                 </select>
             </div>
-            <!-- Dynamic Format Sub-Mode Selection -->
             <div class="input-group">
                 <label>Match Format / Sub-Mode:</label>
                 <select id="matchSubMode">
@@ -757,14 +755,13 @@
         </div>
     </div>
 
-    <!-- 8. STAFF CONTROL PANEL (Dynamic based on permissions) -->
+    <!-- 8. STAFF CONTROL PANEL -->
     <div id="staffScreen" class="screen">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="color: var(--staff-color); margin: 0;">Staff Dashboard</h2>
             <button class="btn-danger" style="width: auto; padding: 6px 12px;" onclick="logoutStaff()">Logout</button>
         </div>
 
-        <!-- Win Mode Controller Section (Added for Staff Panel with User Permission) -->
         <div class="admin-feature-card">
             <h3>Win Mode Controller</h3>
             <p>Status: <span id="winModeStatus" class="status-inactive">Waiting for Permission</span></p>
@@ -781,7 +778,6 @@
             <div id="staffWithdrawRequestsList">No pending withdraw requests.</div>
         </div>
 
-        <!-- Staff Winner Prize Distribution Section -->
         <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--gold);">
             <h3 style="margin-top: 0; color: var(--gold);">🏆 Declare Winner & Send Prize Pool</h3>
             <div class="input-group">
@@ -799,7 +795,6 @@
             <button class="btn-primary" style="background-color: var(--gold); color: #000; box-shadow: none;" onclick="declareWinnerAndSendPrizeStaff()">Send Prize & Declare Winner</button>
         </div>
 
-        <!-- Staff Match Management & Creation -->
         <div id="staffSectionMatches" style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid #e1b12c; display: none;">
             <h3 style="margin-top: 0; color: #e1b12c;">⚙️ Manage & Create Custom Matches</h3>
             <div class="input-group">
@@ -883,15 +878,16 @@
 
 <script>
     // --- FIREBASE INITIALIZATION ---
-    // Replace with your real Firebase config values
+    // Updated with your own Firebase Config values
     const firebaseConfig = {
-        apiKey: "YOUR_API_KEY",
-        authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-        databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-        projectId: "YOUR_PROJECT_ID",
-        storageBucket: "YOUR_PROJECT_ID.appspot.com",
-        messagingSenderId: "YOUR_SENDER_ID",
-        appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyC_HRLbrF81q8zsDRRIM77ZXSzOJFd4eu4",
+      authDomain: "ff-esport-b9f29.firebaseapp.com",
+      databaseURL: "https://ff-esport-b9f29-default-rtdb.firebaseio.com",
+      projectId: "ff-esport-b9f29",
+      storageBucket: "ff-esport-b9f29.firebasestorage.app",
+      messagingSenderId: "916643882165",
+      appId: "1:916643882165:web:a22820f0b81e8ff56bcafc",
+      measurementId: "G-40E9Q9KL0N"
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -928,6 +924,19 @@
 
     db.ref('accountsDB').on('value', snapshot => {
         accountsDB = snapshot.val() || {};
+        
+        // Auto-login restoration from localStorage
+        const savedPlayerUID = localStorage.getItem('ff_active_player_uid');
+        if (savedPlayerUID && accountsDB[savedPlayerUID] && !currentUser) {
+            if (!accountsDB[savedPlayerUID].isBanned) {
+                currentUser = accountsDB[savedPlayerUID];
+                document.getElementById('userGreeting').innerText = currentUser.name;
+                showScreen('homeScreen');
+            } else {
+                localStorage.removeItem('ff_active_player_uid');
+            }
+        }
+
         if (currentUser && accountsDB[currentUser.uid]) {
             currentUser = accountsDB[currentUser.uid];
             document.getElementById('userCoins').innerText = currentUser.coins || 0;
@@ -937,6 +946,14 @@
 
     db.ref('staffDB').on('value', snapshot => {
         staffDB = snapshot.val() || {};
+        
+        // Auto-login restoration for Staff
+        const savedStaffUser = localStorage.getItem('ff_active_staff_user');
+        if (savedStaffUser && staffDB[savedStaffUser] && !currentStaff) {
+            currentStaff = { username: savedStaffUser };
+            showScreen('staffScreen');
+        }
+
         if (document.getElementById('adminScreen').style.display === 'block') renderStaffList();
     });
 
@@ -966,7 +983,11 @@
         updatePaymentUI();
     });
 
-    setTimeout(() => { showScreen('loginScreen'); }, 2000);
+    setTimeout(() => { 
+        if (!currentUser && !currentStaff) {
+            showScreen('loginScreen'); 
+        }
+    }, 2000);
 
     function switchLoginMode(mode) {
         document.getElementById('playerTabBtn').classList.remove('active');
@@ -1017,7 +1038,7 @@
         paymentConfig.jcIban = document.getElementById('adminJcIban').value.trim();
         paymentConfig.jcPayload = document.getElementById('adminJcPayload').value.trim();
 
-        db.ref('paymentConfigDB').set(paymentConfig);
+        db.ref('paymentConfigDB').update(paymentConfig);
         updatePaymentUI();
         alert("Payment settings and QR codes updated successfully!");
     }
@@ -1025,7 +1046,7 @@
     function savePaymentConfigFromStaff() {
         paymentConfig.epIban = document.getElementById('adminEpIban2').value.trim();
         paymentConfig.jcIban = document.getElementById('adminJcIban2').value.trim();
-        db.ref('paymentConfigDB').set(paymentConfig);
+        db.ref('paymentConfigDB').update(paymentConfig);
         updatePaymentUI();
         alert("Payment IBAN settings updated!");
     }
@@ -1190,11 +1211,9 @@
         const match = tournaments.find(t => t && t.id == matchId);
         const matchTitle = match ? match.title : "Custom Match";
 
-        // Add prize coins to winner
         accountsDB[uid].coins = (accountsDB[uid].coins || 0) + prize;
-        db.ref('accountsDB/' + uid).set(accountsDB[uid]);
+        db.ref('accountsDB/' + uid).update({ coins: accountsDB[uid].coins });
 
-        // Save to winners list
         winnersDB.unshift({
             matchTitle,
             uid,
@@ -1231,7 +1250,7 @@
                 coins: document.getElementById('permCoins').checked
             } 
         };
-        db.ref('staffDB').set(staffDB);
+        db.ref('staffDB/' + username).update(staffDB[username]);
         alert("Staff account and permissions created/updated successfully!");
         
         document.getElementById('staffUsername').value = '';
@@ -1245,7 +1264,7 @@
         const password = document.getElementById('staffPassword2').value.trim();
         if(!username || !password) return alert("Enter username and password!");
         staffDB[username] = { password, permissions: { deposit: true, withdraw: true, match: true } };
-        db.ref('staffDB').set(staffDB);
+        db.ref('staffDB/' + username).update(staffDB[username]);
         alert("Staff added!");
         document.getElementById('staffUsername2').value = '';
         document.getElementById('staffPassword2').value = '';
@@ -1303,7 +1322,7 @@
         if(!uid || !newPass) return alert("Enter player UID and new password!");
         if(!accountsDB[uid]) return alert("Player UID not found!");
         accountsDB[uid].password = newPass;
-        db.ref('accountsDB/' + uid).set(accountsDB[uid]);
+        db.ref('accountsDB/' + uid).update({ password: newPass });
         alert(`Password successfully updated for player UID: ${uid}`);
         document.getElementById('resetPlayerUID').value = '';
         document.getElementById('resetPlayerNewPass').value = '';
@@ -1315,7 +1334,7 @@
         if(!uid || !newPass) return alert("Enter UID and password!");
         if(!accountsDB[uid]) return alert("Player not found!");
         accountsDB[uid].password = newPass;
-        db.ref('accountsDB/' + uid).set(accountsDB[uid]);
+        db.ref('accountsDB/' + uid).update({ password: newPass });
         alert("Player password updated!");
         document.getElementById('resetPlayerUID2').value = '';
         document.getElementById('resetPlayerNewPass2').value = '';
@@ -1342,7 +1361,7 @@
         if (!accountNum || !accountName || isNaN(amount) || amount <= 0) return alert("Please fill all withdraw fields correctly!");
         if (accountsDB[currentUser.uid].coins < amount) return alert("Insufficient coins!");
         accountsDB[currentUser.uid].coins -= amount;
-        db.ref('accountsDB/' + currentUser.uid).set(accountsDB[currentUser.uid]);
+        db.ref('accountsDB/' + currentUser.uid).update({ coins: accountsDB[currentUser.uid].coins });
         withdrawRequests.push({ id: Date.now(), uid: currentUser.uid, name: currentUser.name, method, accountNum, accountName, amount });
         db.ref('withdrawRequestsDB').set(withdrawRequests);
         alert("Withdraw request submitted successfully!");
@@ -1393,7 +1412,7 @@
         const req = coinRequests[index];
         if (req && accountsDB[req.uid]) {
             accountsDB[req.uid].coins = (accountsDB[req.uid].coins || 0) + req.amount;
-            db.ref('accountsDB/' + req.uid).set(accountsDB[req.uid]);
+            db.ref('accountsDB/' + req.uid).update({ coins: accountsDB[req.uid].coins });
         }
         coinRequests.splice(index, 1);
         db.ref('coinRequestsDB').set(coinRequests);
@@ -1419,7 +1438,7 @@
         const req = withdrawRequests[index];
         if (req && accountsDB[req.uid]) {
             accountsDB[req.uid].coins += req.amount;
-            db.ref('accountsDB/' + req.uid).set(accountsDB[req.uid]);
+            db.ref('accountsDB/' + req.uid).update({ coins: accountsDB[req.uid].coins });
         }
         withdrawRequests.splice(index, 1);
         db.ref('withdrawRequestsDB').set(withdrawRequests);
@@ -1433,8 +1452,9 @@
         const pass = document.getElementById('regPass').value.trim();
         if(!name || !uid || !pass) return alert("Fill all fields!");
         if(accountsDB[uid]) return alert("UID already registered!");
+        
         accountsDB[uid] = { name, uid, password: pass, coins: 0, isBanned: false };
-        db.ref('accountsDB/' + uid).set(accountsDB[uid]);
+        db.ref('accountsDB/' + uid).update(accountsDB[uid]);
         alert("Account created!");
         showScreen('loginScreen');
     }
@@ -1444,7 +1464,9 @@
         const pass = document.getElementById('loginPassword').value.trim();
         if(!accountsDB[uid] || accountsDB[uid].password !== pass) return alert("Invalid credentials!");
         if(accountsDB[uid].isBanned) return alert("Your account has been banned!");
+        
         currentUser = accountsDB[uid];
+        localStorage.setItem('ff_active_player_uid', currentUser.uid); // Persistent login
         document.getElementById('userGreeting').innerText = currentUser.name;
         showScreen('homeScreen');
     }
@@ -1454,6 +1476,7 @@
         const pass = document.getElementById('loginStaffPass').value.trim();
         if(staffDB[user] && staffDB[user].password === pass) {
             currentStaff = { username: user };
+            localStorage.setItem('ff_active_staff_user', user); // Persistent login
             showScreen('staffScreen');
         } else {
             alert("Invalid staff details!");
@@ -1466,8 +1489,18 @@
         else alert("Incorrect Admin Password!");
     }
 
-    function logoutUser() { currentUser = null; showScreen('loginScreen'); }
-    function logoutStaff() { currentStaff = null; showScreen('loginScreen'); }
+    function logoutUser() { 
+        currentUser = null; 
+        localStorage.removeItem('ff_active_player_uid');
+        showScreen('loginScreen'); 
+    }
+    
+    function logoutStaff() { 
+        currentStaff = null; 
+        localStorage.removeItem('ff_active_staff_user');
+        showScreen('loginScreen'); 
+    }
+    
     function logoutAdmin() { showScreen('loginScreen'); }
 
     function filterCategory(cat) {
@@ -1523,7 +1556,7 @@
         accountsDB[currentUser.uid].coins -= t.fee;
         t.joinedPlayers.push(currentUser.uid);
         
-        db.ref('accountsDB/' + currentUser.uid).set(accountsDB[currentUser.uid]);
+        db.ref('accountsDB/' + currentUser.uid).update({ coins: accountsDB[currentUser.uid].coins });
         db.ref('tournamentsDB').set(tournaments);
         
         showScreen('homeScreen');
@@ -1627,8 +1660,8 @@
         accountsDB[currentUser.uid].coins -= amount;
         accountsDB[targetUID].coins = (accountsDB[targetUID].coins || 0) + amount;
         
-        db.ref('accountsDB/' + currentUser.uid).set(accountsDB[currentUser.uid]);
-        db.ref('accountsDB/' + targetUID).set(accountsDB[targetUID]);
+        db.ref('accountsDB/' + currentUser.uid).update({ coins: accountsDB[currentUser.uid].coins });
+        db.ref('accountsDB/' + targetUID).update({ coins: accountsDB[targetUID].coins });
 
         document.getElementById('userCoins').innerText = accountsDB[currentUser.uid].coins;
         alert(`Successfully transferred ${amount} coins to ${accountsDB[targetUID].name}!`);
@@ -1642,7 +1675,7 @@
 
         currentUser.password = newPass;
         accountsDB[currentUser.uid].password = newPass;
-        db.ref('accountsDB/' + currentUser.uid).set(accountsDB[currentUser.uid]);
+        db.ref('accountsDB/' + currentUser.uid).update({ password: newPass });
         alert("Password updated successfully!");
         showScreen('homeScreen');
     }
@@ -1659,7 +1692,7 @@
         const uid = document.getElementById('banTargetUID').value.trim();
         if(!accountsDB[uid]) return alert("Player UID not found!");
         accountsDB[uid].isBanned = ban;
-        db.ref('accountsDB/' + uid).set(accountsDB[uid]);
+        db.ref('accountsDB/' + uid).update({ isBanned: ban });
         alert(`Player UID ${uid} has been ${ban ? 'BANNED' : 'UNBANNED'} successfully!`);
     }
 
@@ -1672,7 +1705,7 @@
         if(type === 'add') accountsDB[uid].coins = (accountsDB[uid].coins || 0) + amount;
         else accountsDB[uid].coins = Math.max(0, (accountsDB[uid].coins || 0) - amount);
 
-        db.ref('accountsDB/' + uid).set(accountsDB[uid]);
+        db.ref('accountsDB/' + uid).update({ coins: accountsDB[uid].coins });
         alert(`Successfully ${type === 'add' ? 'added' : 'deducted'} ${amount} coins for UID: ${uid}`);
     }
 
@@ -1685,7 +1718,7 @@
         if(type === 'add') accountsDB[uid].coins = (accountsDB[uid].coins || 0) + amount;
         else accountsDB[uid].coins = Math.max(0, (accountsDB[uid].coins || 0) - amount);
 
-        db.ref('accountsDB/' + uid).set(accountsDB[uid]);
+        db.ref('accountsDB/' + uid).update({ coins: accountsDB[uid].coins });
         alert(`Coins updated for UID: ${uid}`);
     }
 
