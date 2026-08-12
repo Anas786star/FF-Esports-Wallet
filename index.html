@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FF Esports - Official Wallet</title>
-    <!-- Firebase SDK (v9 Compatibility Mode for simple script integration) -->
+    <!-- Firebase SDK (v9 Compatibility Mode) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
@@ -49,7 +49,7 @@
             padding: 20px;
             flex-grow: 1;
             box-sizing: border-box;
-            height: 100vh;
+            min-height: 100vh;
             overflow-y: auto;
             padding-bottom: 120px;
         }
@@ -359,20 +359,21 @@
             cursor: pointer;
         }
 
-        .admin-feature-card {
-            background: #2d2d2d;
-            padding: 15px;
-            margin-top: 15px;
+        .player-joined-list {
+            background: rgba(0,0,0,0.3);
+            padding: 8px;
             border-radius: 6px;
-            border-left: 4px solid #00acc1;
+            margin-top: 8px;
+            max-height: 120px;
+            overflow-y: auto;
+            font-size: 11px;
+            border: 1px solid rgba(255,255,255,0.05);
         }
-        .status-inactive {
-            color: #ff5252;
-            font-weight: bold;
-        }
-        .status-active {
-            color: #4caf50;
-            font-weight: bold;
+        .player-joined-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
         }
     </style>
 </head>
@@ -519,6 +520,11 @@
         </div>
 
         <div class="input-group" style="text-align: left;">
+            <label>Sender Account Name / Title (पैसा भेजने वाले का नाम):</label>
+            <input type="text" id="coinSenderName" placeholder="e.g. Muhammad Ali">
+        </div>
+
+        <div class="input-group" style="text-align: left;">
             <label>Amount of Coins Needed:</label>
             <input type="number" id="coinAmountRequest" placeholder="e.g. 500">
         </div>
@@ -556,7 +562,7 @@
         <button class="btn-secondary" style="margin-top: 12px;" onclick="showScreen('homeScreen')">Back to Home</button>
     </div>
 
-    <!-- 7. CHANGE USER PASSWORD SCREEN -->
+    <!-- CHANGE USER PASSWORD SCREEN -->
     <div id="changePasswordScreen" class="screen">
         <h2 style="color: var(--purple); text-align: center; margin-bottom: 25px;">Change Password</h2>
         <div class="input-group">
@@ -578,9 +584,9 @@
             <button class="btn-danger" style="width: auto; padding: 6px 12px;" onclick="logoutAdmin()">Logout</button>
         </div>
 
-        <!-- Staff Management & Full Permissions Section -->
+        <!-- Staff Management -->
         <div style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid var(--staff-color);">
-            <h3 style="margin-top: 0; color: var(--staff-color);">🛡️ Manage Staff & Full Admin Permissions</h3>
+            <h3 style="margin-top: 0; color: var(--staff-color);">🛡️ Manage Staff & Permissions</h3>
             <div class="input-group">
                 <label>Staff Username:</label>
                 <input type="text" id="staffUsername" placeholder="Enter staff username">
@@ -644,12 +650,12 @@
             <h3 style="margin-top: 0; color: var(--neon-blue);">💳 Edit QR & Payment Details</h3>
             
             <h4 style="color: var(--easypaisa-green); margin-bottom: 5px;">EasyPaisa Config</h4>
-            <div class="input-group"><label>Title:</label><input type="text" id="adminEpTitle"></div>
+            <div class="input-group"><label>Account Title:</label><input type="text" id="adminEpTitle"></div>
             <div class="input-group"><label>IBAN / Number:</label><input type="text" id="adminEpIban"></div>
             <div class="input-group"><label>QR Payload Data:</label><input type="text" id="adminEpPayload"></div>
 
             <h4 style="color: var(--jazzcash-red); margin-bottom: 5px; margin-top: 15px;">JazzCash Config</h4>
-            <div class="input-group"><label>Title:</label><input type="text" id="adminJcTitle"></div>
+            <div class="input-group"><label>Account Title:</label><input type="text" id="adminJcTitle"></div>
             <div class="input-group"><label>IBAN / Number:</label><input type="text" id="adminJcIban"></div>
             <div class="input-group"><label>QR Payload Data:</label><input type="text" id="adminJcPayload"></div>
 
@@ -704,12 +710,12 @@
         </div>
 
         <div id="adminSecMatch" style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 20px; border-top: 3px solid #e1b12c;">
-            <h3 style="margin-top: 0; color: #e1b12c;">⚙️ Manage Matches</h3>
+            <h3 style="margin-top: 0; color: #e1b12c;">⚙️ Manage Matches & Joined Players</h3>
             <div id="adminTournamentList">No active matches found.</div>
         </div>
 
         <div id="adminSecMatchCreate" style="background: var(--surface); padding: 15px; border-radius: 8px; margin-bottom: 40px; border-top: 3px solid var(--neon-orange);">
-            <h3 style="margin-top: 0; color: var(--neon-orange);">🏆 Create & Launch Match (Custom / Map)</h3>
+            <h3 style="margin-top: 0; color: var(--neon-orange);">🏆 Create & Launch Match</h3>
             <div class="input-group">
                 <label>Tournament Title / Name:</label>
                 <input type="text" id="matchTitle" placeholder="e.g. Pro Custom Clash">
@@ -755,17 +761,11 @@
         </div>
     </div>
 
-    <!-- 8. STAFF CONTROL PANEL -->
+    <!-- 7. STAFF CONTROL PANEL -->
     <div id="staffScreen" class="screen">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="color: var(--staff-color); margin: 0;">Staff Dashboard</h2>
             <button class="btn-danger" style="width: auto; padding: 6px 12px;" onclick="logoutStaff()">Logout</button>
-        </div>
-
-        <div class="admin-feature-card">
-            <h3>Win Mode Controller</h3>
-            <p>Status: <span id="winModeStatus" class="status-inactive">Waiting for Permission</span></p>
-            <button id="requestWinPermissionBtn" class="btn-primary" onclick="requestWinPermission()">Grant Permission & Activate</button>
         </div>
 
         <div id="staffSectionDeposit" style="background: var(--surface); padding: 15px; border-radius: 8px; margin-top: 20px; margin-bottom: 20px; border-top: 3px solid var(--success); display: none;">
@@ -878,7 +878,6 @@
 
 <script>
     // --- FIREBASE INITIALIZATION ---
-    // Updated with your own Firebase Config values
     const firebaseConfig = {
       apiKey: "AIzaSyC_HRLbrF81q8zsDRRIM77ZXSzOJFd4eu4",
       authDomain: "ff-esport-b9f29.firebaseapp.com",
@@ -892,7 +891,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // In-memory global State synced with Firebase
+    // Global State
     let tournaments = [];
     let accountsDB = {};
     let staffDB = {};
@@ -904,33 +903,38 @@
     let currentStaff = null;
     let currentCat = 'SOLO';
 
+    // EasyPaisa / JazzCash Account Details
     let paymentConfig = {
-        epTitle: "SHAHEEN NOOR",
+        epTitle: "YOUR ACCOUNT NAME",
         epIban: "PK60TMFB0000000069849151",
         epPayload: "0002020102110202000424PK60TMFB0000000069849151100468A6",
-        jcTitle: "SHAHEEN",
+        jcTitle: "YOUR ACCOUNT NAME",
         jcIban: "PK86JCMA3007923086612979",
         jcPayload: "0002020102110202000424PK86JCMA30079230866129791004C955"
     };
 
-    // Listen for Realtime Firebase Changes
+    // Firebase Sync Listeners
     db.ref('tournamentsDB').on('value', snapshot => {
         tournaments = snapshot.val() || [];
-        if (document.getElementById('homeScreen').style.display === 'block') renderTournaments();
-        if (document.getElementById('adminScreen').style.display === 'block') renderAdminTournaments();
-        if (document.getElementById('staffScreen').style.display === 'block') renderStaffTournaments();
+        const home = document.getElementById('homeScreen');
+        const admin = document.getElementById('adminScreen');
+        const staff = document.getElementById('staffScreen');
+
+        if (home && home.style.display === 'block') renderTournaments();
+        if (admin && admin.style.display === 'block') renderAdminTournaments();
+        if (staff && staff.style.display === 'block') renderStaffTournaments();
         populateWinnerMatchDropdowns();
     });
 
     db.ref('accountsDB').on('value', snapshot => {
         accountsDB = snapshot.val() || {};
         
-        // Auto-login restoration from localStorage
         const savedPlayerUID = localStorage.getItem('ff_active_player_uid');
         if (savedPlayerUID && accountsDB[savedPlayerUID] && !currentUser) {
             if (!accountsDB[savedPlayerUID].isBanned) {
                 currentUser = accountsDB[savedPlayerUID];
-                document.getElementById('userGreeting').innerText = currentUser.name;
+                const greetingEl = document.getElementById('userGreeting');
+                if(greetingEl) greetingEl.innerText = currentUser.name;
                 showScreen('homeScreen');
             } else {
                 localStorage.removeItem('ff_active_player_uid');
@@ -939,39 +943,52 @@
 
         if (currentUser && accountsDB[currentUser.uid]) {
             currentUser = accountsDB[currentUser.uid];
-            document.getElementById('userCoins').innerText = currentUser.coins || 0;
+            const coinsEl = document.getElementById('userCoins');
+            if(coinsEl) coinsEl.innerText = currentUser.coins || 0;
         }
-        if (document.getElementById('homeScreen').style.display === 'block') renderLeaderboard();
+
+        const home = document.getElementById('homeScreen');
+        const admin = document.getElementById('adminScreen');
+        const staff = document.getElementById('staffScreen');
+
+        if (home && home.style.display === 'block') renderLeaderboard();
+        if (admin && admin.style.display === 'block') renderAdminTournaments();
+        if (staff && staff.style.display === 'block') renderStaffTournaments();
     });
 
     db.ref('staffDB').on('value', snapshot => {
         staffDB = snapshot.val() || {};
         
-        // Auto-login restoration for Staff
         const savedStaffUser = localStorage.getItem('ff_active_staff_user');
         if (savedStaffUser && staffDB[savedStaffUser] && !currentStaff) {
             currentStaff = { username: savedStaffUser };
             showScreen('staffScreen');
         }
 
-        if (document.getElementById('adminScreen').style.display === 'block') renderStaffList();
+        const admin = document.getElementById('adminScreen');
+        if (admin && admin.style.display === 'block') renderStaffList();
     });
 
     db.ref('coinRequestsDB').on('value', snapshot => {
         coinRequests = snapshot.val() || [];
-        if (document.getElementById('adminScreen').style.display === 'block') renderCoinRequests();
-        if (document.getElementById('staffScreen').style.display === 'block') renderStaffCoinRequests();
+        const admin = document.getElementById('adminScreen');
+        const staff = document.getElementById('staffScreen');
+        if (admin && admin.style.display === 'block') renderCoinRequests();
+        if (staff && staff.style.display === 'block') renderStaffCoinRequests();
     });
 
     db.ref('withdrawRequestsDB').on('value', snapshot => {
         withdrawRequests = snapshot.val() || [];
-        if (document.getElementById('adminScreen').style.display === 'block') renderWithdrawRequests();
-        if (document.getElementById('staffScreen').style.display === 'block') renderStaffWithdrawRequests();
+        const admin = document.getElementById('adminScreen');
+        const staff = document.getElementById('staffScreen');
+        if (admin && admin.style.display === 'block') renderWithdrawRequests();
+        if (staff && staff.style.display === 'block') renderStaffWithdrawRequests();
     });
 
     db.ref('winnersDB').on('value', snapshot => {
         winnersDB = snapshot.val() || [];
-        if (document.getElementById('homeScreen').style.display === 'block') renderLeaderboard();
+        const home = document.getElementById('homeScreen');
+        if (home && home.style.display === 'block') renderLeaderboard();
     });
 
     db.ref('adminPasswordDB').on('value', snapshot => {
@@ -983,11 +1000,13 @@
         updatePaymentUI();
     });
 
-    setTimeout(() => { 
-        if (!currentUser && !currentStaff) {
-            showScreen('loginScreen'); 
-        }
-    }, 2000);
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => { 
+            if (!currentUser && !currentStaff) {
+                showScreen('loginScreen'); 
+            }
+        }, 1200);
+    });
 
     function switchLoginMode(mode) {
         document.getElementById('playerTabBtn').classList.remove('active');
@@ -1010,24 +1029,30 @@
     }
 
     function updatePaymentUI() {
-        document.getElementById('displayEpTitle').innerText = paymentConfig.epTitle;
-        document.getElementById('displayEpIban').innerText = paymentConfig.epIban;
-        document.getElementById('displayEpQR').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(paymentConfig.epPayload)}`;
+        const epTitle = document.getElementById('displayEpTitle');
+        const epIban = document.getElementById('displayEpIban');
+        const epQr = document.getElementById('displayEpQR');
+        if(epTitle) epTitle.innerText = paymentConfig.epTitle;
+        if(epIban) epIban.innerText = paymentConfig.epIban;
+        if(epQr) epQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(paymentConfig.epPayload)}`;
 
-        document.getElementById('displayJcTitle').innerText = paymentConfig.jcTitle;
-        document.getElementById('displayJcIban').innerText = paymentConfig.jcIban;
-        document.getElementById('displayJcQR').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(paymentConfig.jcPayload)}`;
+        const jcTitle = document.getElementById('displayJcTitle');
+        const jcIban = document.getElementById('displayJcIban');
+        const jcQr = document.getElementById('displayJcQR');
+        if(jcTitle) jcTitle.innerText = paymentConfig.jcTitle;
+        if(jcIban) jcIban.innerText = paymentConfig.jcIban;
+        if(jcQr) jcQr.src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(paymentConfig.jcPayload)}`;
     }
 
     function loadAdminPaymentInputs() {
-        document.getElementById('adminEpTitle').value = paymentConfig.epTitle;
-        document.getElementById('adminEpIban').value = paymentConfig.epIban;
-        document.getElementById('adminEpPayload').value = paymentConfig.epPayload;
-        document.getElementById('adminJcTitle').value = paymentConfig.jcTitle;
-        document.getElementById('adminJcIban').value = paymentConfig.jcIban;
-        document.getElementById('adminJcPayload').value = paymentConfig.jcPayload;
-        document.getElementById('adminEpIban2').value = paymentConfig.epIban;
-        document.getElementById('adminJcIban2').value = paymentConfig.jcIban;
+        if(document.getElementById('adminEpTitle')) document.getElementById('adminEpTitle').value = paymentConfig.epTitle;
+        if(document.getElementById('adminEpIban')) document.getElementById('adminEpIban').value = paymentConfig.epIban;
+        if(document.getElementById('adminEpPayload')) document.getElementById('adminEpPayload').value = paymentConfig.epPayload;
+        if(document.getElementById('adminJcTitle')) document.getElementById('adminJcTitle').value = paymentConfig.jcTitle;
+        if(document.getElementById('adminJcIban')) document.getElementById('adminJcIban').value = paymentConfig.jcIban;
+        if(document.getElementById('adminJcPayload')) document.getElementById('adminJcPayload').value = paymentConfig.jcPayload;
+        if(document.getElementById('adminEpIban2')) document.getElementById('adminEpIban2').value = paymentConfig.epIban;
+        if(document.getElementById('adminJcIban2')) document.getElementById('adminJcIban2').value = paymentConfig.jcIban;
     }
 
     function savePaymentConfig() {
@@ -1081,10 +1106,11 @@
         if(target) target.style.display = (screenId === 'splashScreen') ? 'flex' : 'block';
         
         const nav = document.getElementById('mainNav');
-        nav.style.display = (screenId === 'homeScreen' || screenId === 'addCoinsScreen' || screenId === 'withdrawScreen' || screenId === 'changePasswordScreen') ? 'flex' : 'none';
+        if(nav) nav.style.display = (screenId === 'homeScreen' || screenId === 'addCoinsScreen' || screenId === 'withdrawScreen' || screenId === 'changePasswordScreen') ? 'flex' : 'none';
 
         if(screenId === 'homeScreen' && currentUser) {
-            document.getElementById('userCoins').innerText = accountsDB[currentUser.uid]?.coins || 0;
+            const coinsEl = document.getElementById('userCoins');
+            if(coinsEl) coinsEl.innerText = accountsDB[currentUser.uid]?.coins || 0;
             renderTournaments();
             renderLeaderboard();
         }
@@ -1138,45 +1164,30 @@
     }
 
     function updateSubModeOptions() {
-        const cat = document.getElementById('matchCategory').value;
+        const catEl = document.getElementById('matchCategory');
         const subSelect = document.getElementById('matchSubMode');
+        if(!catEl || !subSelect) return;
         subSelect.innerHTML = '';
-        const options = getSubModesForCategory(cat);
+        const options = getSubModesForCategory(catEl.value);
         options.forEach(opt => {
             subSelect.innerHTML += `<option value="${opt.value}">${opt.label}</option>`;
         });
     }
 
     function updateStaffSubModeOptions() {
-        const cat = document.getElementById('staffMatchCategory').value;
+        const catEl = document.getElementById('staffMatchCategory');
         const subSelect = document.getElementById('staffMatchSubMode');
+        if(!catEl || !subSelect) return;
         subSelect.innerHTML = '';
-        const options = getSubModesForCategory(cat);
+        const options = getSubModesForCategory(catEl.value);
         options.forEach(opt => {
             subSelect.innerHTML += `<option value="${opt.value}">${opt.label}</option>`;
         });
     }
 
-    let winFeatureActive = false;
-
-    function requestWinPermission() {
-        let userConfirmed = confirm("Do you want to grant permission to activate the Win feature for the staff panel?");
-        
-        if (userConfirmed) {
-            winFeatureActive = true;
-            document.getElementById("winModeStatus").innerText = "Active (Permission Granted)";
-            document.getElementById("winModeStatus").className = "status-active";
-        } else {
-            winFeatureActive = false;
-            document.getElementById("winModeStatus").innerText = "Permission Denied";
-            document.getElementById("winModeStatus").className = "status-inactive";
-        }
-    }
-
     function populateWinnerMatchDropdowns() {
         const adminSelect = document.getElementById('winnerMatchSelect');
         const staffSelect = document.getElementById('winnerMatchSelectStaff');
-        if(!adminSelect && !staffSelect) return;
         
         let html = '';
         if(tournaments.length === 0) {
@@ -1225,8 +1236,8 @@
 
         alert(`Success! ${prize} prize coins successfully sent to winner ${accountsDB[uid].name} (UID: ${uid})!`);
         
-        document.getElementById('winnerUID').value = '';
-        document.getElementById('winnerPrizeCoins').value = '';
+        if(document.getElementById('winnerUID')) document.getElementById('winnerUID').value = '';
+        if(document.getElementById('winnerPrizeCoins')) document.getElementById('winnerPrizeCoins').value = '';
         if(document.getElementById('winnerUIDStaff')) document.getElementById('winnerUIDStaff').value = '';
         if(document.getElementById('winnerPrizeCoinsStaff')) document.getElementById('winnerPrizeCoinsStaff').value = '';
 
@@ -1251,7 +1262,7 @@
             } 
         };
         db.ref('staffDB/' + username).update(staffDB[username]);
-        alert("Staff account and permissions created/updated successfully!");
+        alert("Staff account created/updated successfully!");
         
         document.getElementById('staffUsername').value = '';
         document.getElementById('staffPassword').value = '';
@@ -1272,6 +1283,7 @@
 
     function renderStaffList() {
         const container = document.getElementById('adminStaffList');
+        if(!container) return;
         container.innerHTML = '';
         const keys = Object.keys(staffDB);
         if(keys.length === 0) {
@@ -1307,13 +1319,13 @@
         const staffData = staffDB[currentStaff.username];
         const p = staffData ? (staffData.permissions || {}) : {};
 
-        document.getElementById('staffSectionDeposit').style.display = p.deposit ? 'block' : 'none';
-        document.getElementById('staffSectionWithdraw').style.display = p.withdraw ? 'block' : 'none';
-        document.getElementById('staffSectionMatches').style.display = p.match ? 'block' : 'none';
-        document.getElementById('staffSectionStaff').style.display = p.staff ? 'block' : 'none';
-        document.getElementById('staffSectionPass').style.display = p.pass ? 'block' : 'none';
-        document.getElementById('staffSectionPayCfg').style.display = p.payCfg ? 'block' : 'none';
-        document.getElementById('staffSectionCoins').style.display = p.coins ? 'block' : 'none';
+        if(document.getElementById('staffSectionDeposit')) document.getElementById('staffSectionDeposit').style.display = p.deposit ? 'block' : 'none';
+        if(document.getElementById('staffSectionWithdraw')) document.getElementById('staffSectionWithdraw').style.display = p.withdraw ? 'block' : 'none';
+        if(document.getElementById('staffSectionMatches')) document.getElementById('staffSectionMatches').style.display = p.match ? 'block' : 'none';
+        if(document.getElementById('staffSectionStaff')) document.getElementById('staffSectionStaff').style.display = p.staff ? 'block' : 'none';
+        if(document.getElementById('staffSectionPass')) document.getElementById('staffSectionPass').style.display = p.pass ? 'block' : 'none';
+        if(document.getElementById('staffSectionPayCfg')) document.getElementById('staffSectionPayCfg').style.display = p.payCfg ? 'block' : 'none';
+        if(document.getElementById('staffSectionCoins')) document.getElementById('staffSectionCoins').style.display = p.coins ? 'block' : 'none';
     }
 
     function adminResetPlayerPassword() {
@@ -1341,12 +1353,26 @@
     }
 
     function submitCoinRequest() {
+        const senderName = document.getElementById('coinSenderName').value.trim();
         const amount = parseInt(document.getElementById('coinAmountRequest').value);
         const trxDetails = document.getElementById('coinTrxDetails').value.trim();
-        if(isNaN(amount) || amount <= 0 || !trxDetails) return alert("Please enter valid amount and transaction details!");
-        coinRequests.push({ id: Date.now(), uid: currentUser.uid, name: currentUser.name, amount: amount, trx: trxDetails });
+        
+        if(!senderName || isNaN(amount) || amount <= 0 || !trxDetails) {
+            return alert("Please enter Sender Name, valid Amount, and Transaction ID!");
+        }
+
+        coinRequests.push({ 
+            id: Date.now(), 
+            uid: currentUser.uid, 
+            name: currentUser.name, 
+            senderName: senderName,
+            amount: amount, 
+            trx: trxDetails 
+        });
+
         db.ref('coinRequestsDB').set(coinRequests);
         alert("Deposit request submitted successfully!");
+        document.getElementById('coinSenderName').value = '';
         document.getElementById('coinAmountRequest').value = '';
         document.getElementById('coinTrxDetails').value = '';
         showScreen('homeScreen');
@@ -1372,13 +1398,19 @@
     function renderStaffCoinRequests() { renderCoinListHTML(document.getElementById('staffCoinRequestsList'), false); }
 
     function renderCoinListHTML(container, isAdmin) {
+        if(!container) return;
         container.innerHTML = '';
         if(coinRequests.length === 0) { container.innerHTML = 'No pending payment requests.'; return; }
         coinRequests.forEach((req, index) => {
             if(!req) return;
             container.innerHTML += `
                 <div class="admin-list-item" style="border-left-color: var(--success);">
-                    <div><b>Player:</b> ${req.name} (UID: ${req.uid})<br><b>Coins:</b> <span style="color:var(--success);">${req.amount}</span><br><b>Trx:</b> ${req.trx}</div>
+                    <div>
+                        <b>Player (IGN):</b> ${req.name} (UID: ${req.uid})<br>
+                        <b>Sender Account Title:</b> <span style="color:var(--gold); font-weight:bold;">${req.senderName || 'N/A'}</span><br>
+                        <b>Coins:</b> <span style="color:var(--success); font-weight:bold;">${req.amount}</span><br>
+                        <b>Trx ID:</b> ${req.trx}
+                    </div>
                     <div style="display: flex; gap: 8px; margin-top: 8px;">
                         <button class="btn-primary" style="flex:1; padding:6px; font-size:12px; background:var(--success); box-shadow:none;" onclick="approveCoinRequest(${index}, ${isAdmin})">Approve</button>
                         <button class="btn-danger" style="flex:1; padding:6px; font-size:12px; width:auto;" onclick="rejectCoinRequest(${index}, ${isAdmin})">Reject</button>
@@ -1392,6 +1424,7 @@
     function renderStaffWithdrawRequests() { renderWithdrawListHTML(document.getElementById('staffWithdrawRequestsList'), false); }
 
     function renderWithdrawListHTML(container, isAdmin) {
+        if(!container) return;
         container.innerHTML = '';
         if(withdrawRequests.length === 0) { container.innerHTML = 'No pending withdraw requests.'; return; }
         withdrawRequests.forEach((req, index) => {
@@ -1466,7 +1499,7 @@
         if(accountsDB[uid].isBanned) return alert("Your account has been banned!");
         
         currentUser = accountsDB[uid];
-        localStorage.setItem('ff_active_player_uid', currentUser.uid); // Persistent login
+        localStorage.setItem('ff_active_player_uid', currentUser.uid);
         document.getElementById('userGreeting').innerText = currentUser.name;
         showScreen('homeScreen');
     }
@@ -1476,7 +1509,7 @@
         const pass = document.getElementById('loginStaffPass').value.trim();
         if(staffDB[user] && staffDB[user].password === pass) {
             currentStaff = { username: user };
-            localStorage.setItem('ff_active_staff_user', user); // Persistent login
+            localStorage.setItem('ff_active_staff_user', user);
             showScreen('staffScreen');
         } else {
             alert("Invalid staff details!");
@@ -1513,6 +1546,7 @@
 
     function renderTournaments() {
         const container = document.getElementById('tournamentList');
+        if(!container) return;
         container.innerHTML = '';
         const list = tournaments.filter(t => t && t.category === currentCat);
         if(list.length === 0) {
@@ -1546,6 +1580,7 @@
     }
 
     function joinTournament(id) {
+        if(!currentUser) return alert("Please login first!");
         const t = tournaments.find(x => x && x.id === id);
         if(!t) return;
         if(!t.joinedPlayers) t.joinedPlayers = [];
@@ -1613,18 +1648,42 @@
     function renderStaffTournaments() { renderTournamentsListHTML(document.getElementById('staffTournamentList'), false); }
 
     function renderTournamentsListHTML(container, isAdmin) {
+        if(!container) return;
         container.innerHTML = '';
         if(tournaments.length === 0) { container.innerHTML = 'No active matches.'; return; }
+        
         tournaments.forEach(t => {
             if(!t) return;
+            
+            let playersHtml = '';
+            if(t.joinedPlayers && t.joinedPlayers.length > 0) {
+                t.joinedPlayers.forEach((pUid, idx) => {
+                    const pName = accountsDB[pUid] ? accountsDB[pUid].name : 'Unknown';
+                    playersHtml += `
+                        <div class="player-joined-item">
+                            <span>${idx+1}. <b>${pName}</b></span>
+                            <span style="color:var(--neon-blue);">UID: ${pUid}</span>
+                        </div>
+                    `;
+                });
+            } else {
+                playersHtml = '<div style="color:var(--text-gray);">No players joined yet.</div>';
+            }
+
             container.innerHTML += `
                 <div class="admin-list-item" style="border-left-color: var(--gold);">
-                    <div><b>${t.title}</b> (${t.subMode || t.category})<br>Players: ${(t.joinedPlayers||[]).length}/${t.maxSlots}</div>
-                    <div style="margin-top:6px; display:flex; gap:6px;">
+                    <div><b>${t.title}</b> (${t.subMode || t.category})<br>Joined: <b>${(t.joinedPlayers||[]).length}/${t.maxSlots}</b> | Fee: <b>${t.fee} Coins</b></div>
+                    
+                    <div style="margin-top:6px; font-weight:bold; color:var(--staff-color); font-size:11px;">🎮 Joined Players (Name & UID):</div>
+                    <div class="player-joined-list">
+                        ${playersHtml}
+                    </div>
+
+                    <div style="margin-top:8px; display:flex; gap:6px;">
                         <input type="text" placeholder="Room ID" id="rid_${t.id}" value="${t.roomId||''}" style="padding:4px; font-size:11px; flex:1; background:var(--surface); color:#fff; border:1px solid #444; border-radius:4px;">
                         <input type="text" placeholder="Pass" id="rpass_${t.id}" value="${t.roomPassword||''}" style="padding:4px; font-size:11px; flex:1; background:var(--surface); color:#fff; border:1px solid #444; border-radius:4px;">
                         <button class="btn-primary" style="padding:4px 8px; font-size:11px; width:auto; margin:0;" onclick="updateRoomInfo(${t.id}, ${isAdmin})">Save</button>
-                        <button class="btn-danger" style="padding:4px 8px; font-size:11px; width:auto;" onclick="deleteMatch(${t.id}, ${isAdmin})">X</button>
+                        <button class="btn-danger" style="padding:4px 8px; font-size:11px; width:auto;" onclick="deleteMatchAndRefund(${t.id}, ${isAdmin})">Cancel & Refund</button>
                     </div>
                 </div>
             `;
@@ -1641,14 +1700,35 @@
         }
     }
 
-    function deleteMatch(id, isAdmin) {
-        tournaments = tournaments.filter(x => x && x.id !== id);
-        db.ref('tournamentsDB').set(tournaments);
-        if(isAdmin) renderAdminTournaments(); else renderStaffTournaments();
-        populateWinnerMatchDropdowns();
+    function deleteMatchAndRefund(id, isAdmin) {
+        const t = tournaments.find(x => x && x.id === id);
+        if(!t) return;
+
+        if(confirm(`Are you sure you want to cancel/delete "${t.title}"?\nAll joined players (${(t.joinedPlayers||[]).length}) will get an AUTOMATIC COIN REFUND!`)) {
+            
+            let refundedCount = 0;
+            if(t.joinedPlayers && t.joinedPlayers.length > 0 && t.fee > 0) {
+                t.joinedPlayers.forEach(pUid => {
+                    if(accountsDB[pUid]) {
+                        accountsDB[pUid].coins = (accountsDB[pUid].coins || 0) + t.fee;
+                        db.ref('accountsDB/' + pUid).update({ coins: accountsDB[pUid].coins });
+                        refundedCount++;
+                    }
+                });
+            }
+
+            tournaments = tournaments.filter(x => x && x.id !== id);
+            db.ref('tournamentsDB').set(tournaments);
+
+            alert(`Match cancelled successfully!\nAutomatic refund completed for ${refundedCount} players (${t.fee} coins each refunded).`);
+            
+            if(isAdmin) renderAdminTournaments(); else renderStaffTournaments();
+            populateWinnerMatchDropdowns();
+        }
     }
 
     function transferCoins() {
+        if(!currentUser) return alert("Please login first!");
         const targetUID = prompt("Enter Receiver Player UID:");
         if(!targetUID || !accountsDB[targetUID]) return alert("Invalid Player UID!");
         if(targetUID === currentUser.uid) return alert("Cannot send coins to yourself!");
@@ -1668,6 +1748,7 @@
     }
 
     function changeUserPassword() {
+        if(!currentUser) return alert("Please login first!");
         const oldPass = document.getElementById('oldUserPass').value.trim();
         const newPass = document.getElementById('newUserPass').value.trim();
         if(oldPass !== currentUser.password) return alert("Incorrect current password!");
@@ -1724,6 +1805,7 @@
 
     function renderLeaderboard() {
         const container = document.getElementById('playerLeaderboardList');
+        if(!container) return;
         container.innerHTML = '';
         
         if(winnersDB.length === 0) {
