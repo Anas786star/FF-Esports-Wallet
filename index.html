@@ -375,6 +375,15 @@
             padding: 3px 0;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
+
+        .ss-preview {
+            max-width: 100%;
+            max-height: 120px;
+            border-radius: 6px;
+            margin-top: 8px;
+            border: 1px solid var(--neon-blue);
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -520,8 +529,8 @@
         </div>
 
         <div class="input-group" style="text-align: left;">
-            <label>Sender Account Name / Title (पैसा भेजने वाले का नाम):</label>
-            <input type="text" id="coinSenderName" placeholder="e.g. Muhammad Ali">
+            <label>Sender Account Title / Name:</label>
+            <input type="text" id="coinSenderName" placeholder="e.g. John Doe">
         </div>
 
         <div class="input-group" style="text-align: left;">
@@ -532,6 +541,13 @@
             <label>Transaction ID (Trx ID / TID):</label>
             <input type="text" id="coinTrxDetails" placeholder="Enter Transaction ID">
         </div>
+        
+        <!-- Payment Screenshot Input -->
+        <div class="input-group" style="text-align: left;">
+            <label>Attach Payment Screenshot:</label>
+            <input type="file" id="coinScreenshotFile" accept="image/*" style="padding: 8px;">
+        </div>
+
         <button class="btn-primary" onclick="submitCoinRequest()">Submit Deposit Request</button>
         <button class="btn-secondary" style="margin-top: 12px;" onclick="showScreen('homeScreen')">Cancel</button>
     </div>
@@ -745,10 +761,25 @@
                 <label>Entry Fee (Coins):</label>
                 <input type="number" id="matchFee" placeholder="e.g. 20">
             </div>
+
+            <!-- Flexible Prize Pool & Per Kill Fields -->
             <div class="input-group">
-                <label>Prize Pool amount:</label>
-                <input type="text" id="matchPrize" placeholder="e.g. 600">
+                <label>1st Prize (Coins):</label>
+                <input type="number" id="matchPrize1st" placeholder="e.g. 500 (Optional)">
             </div>
+            <div class="input-group">
+                <label>2nd Prize (Coins):</label>
+                <input type="number" id="matchPrize2nd" placeholder="e.g. 200 (Optional)">
+            </div>
+            <div class="input-group">
+                <label>3rd Prize (Coins):</label>
+                <input type="number" id="matchPrize3rd" placeholder="e.g. 100 (Optional)">
+            </div>
+            <div class="input-group">
+                <label>Per Kill Coins:</label>
+                <input type="number" id="matchPerKill" placeholder="e.g. 10 (Optional)">
+            </div>
+
             <div class="input-group">
                 <label>Room ID (Optional):</label>
                 <input type="text" id="matchRoomID" placeholder="e.g. 849302">
@@ -827,8 +858,20 @@
                 <input type="number" id="staffMatchFee" placeholder="Fee">
             </div>
             <div class="input-group">
-                <label>Prize:</label>
-                <input type="text" id="staffMatchPrize" placeholder="Prize">
+                <label>1st Prize:</label>
+                <input type="number" id="staffMatchPrize1st" placeholder="1st Prize (Optional)">
+            </div>
+            <div class="input-group">
+                <label>2nd Prize:</label>
+                <input type="number" id="staffMatchPrize2nd" placeholder="2nd Prize (Optional)">
+            </div>
+            <div class="input-group">
+                <label>3rd Prize:</label>
+                <input type="number" id="staffMatchPrize3rd" placeholder="3rd Prize (Optional)">
+            </div>
+            <div class="input-group">
+                <label>Per Kill Coins:</label>
+                <input type="number" id="staffMatchPerKill" placeholder="Per Kill Coins (Optional)">
             </div>
             <button class="btn-primary" style="background:#e1b12c; color:#000; box-shadow:none; margin-bottom:15px;" onclick="staffCreateMatch()">Launch Match</button>
             
@@ -1356,26 +1399,41 @@
         const senderName = document.getElementById('coinSenderName').value.trim();
         const amount = parseInt(document.getElementById('coinAmountRequest').value);
         const trxDetails = document.getElementById('coinTrxDetails').value.trim();
+        const fileInput = document.getElementById('coinScreenshotFile');
         
         if(!senderName || isNaN(amount) || amount <= 0 || !trxDetails) {
             return alert("Please enter Sender Name, valid Amount, and Transaction ID!");
         }
 
-        coinRequests.push({ 
-            id: Date.now(), 
-            uid: currentUser.uid, 
-            name: currentUser.name, 
-            senderName: senderName,
-            amount: amount, 
-            trx: trxDetails 
-        });
+        const pushRequest = (screenshotBase64 = "") => {
+            coinRequests.push({ 
+                id: Date.now(), 
+                uid: currentUser.uid, 
+                name: currentUser.name, 
+                senderName: senderName,
+                amount: amount, 
+                trx: trxDetails,
+                screenshot: screenshotBase64
+            });
 
-        db.ref('coinRequestsDB').set(coinRequests);
-        alert("Deposit request submitted successfully!");
-        document.getElementById('coinSenderName').value = '';
-        document.getElementById('coinAmountRequest').value = '';
-        document.getElementById('coinTrxDetails').value = '';
-        showScreen('homeScreen');
+            db.ref('coinRequestsDB').set(coinRequests);
+            alert("Deposit request submitted successfully!");
+            document.getElementById('coinSenderName').value = '';
+            document.getElementById('coinAmountRequest').value = '';
+            document.getElementById('coinTrxDetails').value = '';
+            if(fileInput) fileInput.value = '';
+            showScreen('homeScreen');
+        };
+
+        if (fileInput && fileInput.files && fileInput.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                pushRequest(e.target.result);
+            };
+            reader.readAsDataURL(fileInput.files[0]);
+        } else {
+            pushRequest("");
+        }
     }
 
     function submitWithdrawRequest() {
@@ -1403,6 +1461,10 @@
         if(coinRequests.length === 0) { container.innerHTML = 'No pending payment requests.'; return; }
         coinRequests.forEach((req, index) => {
             if(!req) return;
+            const ssHtml = req.screenshot 
+                ? `<div style="margin-top:6px;"><b>Payment Screenshot:</b><br><a href="${req.screenshot}" target="_blank"><img src="${req.screenshot}" class="ss-preview" alt="Screenshot Preview"></a></div>` 
+                : '<div style="color:var(--text-gray); font-size:11px; margin-top:4px;">No Screenshot Attached</div>';
+
             container.innerHTML += `
                 <div class="admin-list-item" style="border-left-color: var(--success);">
                     <div>
@@ -1410,6 +1472,7 @@
                         <b>Sender Account Title:</b> <span style="color:var(--gold); font-weight:bold;">${req.senderName || 'N/A'}</span><br>
                         <b>Coins:</b> <span style="color:var(--success); font-weight:bold;">${req.amount}</span><br>
                         <b>Trx ID:</b> ${req.trx}
+                        ${ssHtml}
                     </div>
                     <div style="display: flex; gap: 8px; margin-top: 8px;">
                         <button class="btn-primary" style="flex:1; padding:6px; font-size:12px; background:var(--success); box-shadow:none;" onclick="approveCoinRequest(${index}, ${isAdmin})">Approve</button>
@@ -1556,13 +1619,22 @@
 
         list.forEach(t => {
             const joined = t.joinedPlayers && t.joinedPlayers.includes(currentUser?.uid);
+            
+            let prizeDetails = [];
+            if(t.prize1st) prizeDetails.push(`1st: <b style="color:var(--gold);">${t.prize1st}</b>`);
+            if(t.prize2nd) prizeDetails.push(`2nd: <b style="color:var(--text-white);">${t.prize2nd}</b>`);
+            if(t.prize3rd) prizeDetails.push(`3rd: <b style="color:var(--neon-orange);">${t.prize3rd}</b>`);
+            if(t.perKill) prizeDetails.push(`Per Kill: <b style="color:var(--neon-blue);">${t.perKill}</b>`);
+
+            const prizeStr = prizeDetails.length > 0 ? prizeDetails.join(' | ') : 'N/A';
+
             container.innerHTML += `
                 <div class="card">
                     <span class="mode-badge badge-${t.category.toLowerCase()}">${t.subMode || t.category}</span>
                     <h3 style="margin:0 0 8px 0; color:var(--text-white);">${t.title}</h3>
                     <div style="font-size:13px; color:var(--text-gray); margin-bottom:10px;">
-                        <span>Prize: <b style="color:var(--gold);">${t.prize}</b></span> | 
-                        <span>Fee: <b style="color:var(--success);">${t.fee} Coins</b></span><br>
+                        <span>Prize Pool: ${prizeStr}</span><br>
+                        <span>Fee: <b style="color:var(--success);">${t.fee} Coins</b></span> | 
                         <span>Slots: <b>${(t.joinedPlayers || []).length}/${t.maxSlots}</b></span>
                     </div>
                     ${joined ? `
@@ -1604,7 +1676,12 @@
         const subMode = document.getElementById('matchSubMode').value;
         const maxSlots = parseInt(document.getElementById('matchMaxSlots').value) || 50;
         const fee = parseInt(document.getElementById('matchFee').value) || 0;
-        const prize = document.getElementById('matchPrize').value.trim();
+        
+        const prize1st = document.getElementById('matchPrize1st').value.trim();
+        const prize2nd = document.getElementById('matchPrize2nd').value.trim();
+        const prize3rd = document.getElementById('matchPrize3rd').value.trim();
+        const perKill = document.getElementById('matchPerKill').value.trim();
+
         const roomId = document.getElementById('matchRoomID').value.trim();
         const roomPassword = document.getElementById('matchRoomPassword').value.trim();
 
@@ -1612,12 +1689,23 @@
 
         tournaments.push({
             id: Date.now(),
-            title, category: cat, subMode, maxSlots, fee, prize, roomId, roomPassword,
+            title, category: cat, subMode, maxSlots, fee, 
+            prize1st, prize2nd, prize3rd, perKill,
+            roomId, roomPassword,
             joinedPlayers: []
         });
 
         db.ref('tournamentsDB').set(tournaments);
         alert("Match launched successfully!");
+        
+        document.getElementById('matchTitle').value = '';
+        document.getElementById('matchPrize1st').value = '';
+        document.getElementById('matchPrize2nd').value = '';
+        document.getElementById('matchPrize3rd').value = '';
+        document.getElementById('matchPerKill').value = '';
+        document.getElementById('matchRoomID').value = '';
+        document.getElementById('matchRoomPassword').value = '';
+
         renderAdminTournaments();
         populateWinnerMatchDropdowns();
     }
@@ -1628,18 +1716,31 @@
         const subMode = document.getElementById('staffMatchSubMode').value;
         const maxSlots = parseInt(document.getElementById('staffMatchSlots').value) || 50;
         const fee = parseInt(document.getElementById('staffMatchFee').value) || 0;
-        const prize = document.getElementById('staffMatchPrize').value.trim();
+        
+        const prize1st = document.getElementById('staffMatchPrize1st').value.trim();
+        const prize2nd = document.getElementById('staffMatchPrize2nd').value.trim();
+        const prize3rd = document.getElementById('staffMatchPrize3rd').value.trim();
+        const perKill = document.getElementById('staffMatchPerKill').value.trim();
 
         if(!title) return alert("Enter match title!");
 
         tournaments.push({
             id: Date.now(),
-            title, category: cat, subMode, maxSlots, fee, prize, roomId:'', roomPassword:'',
+            title, category: cat, subMode, maxSlots, fee, 
+            prize1st, prize2nd, prize3rd, perKill,
+            roomId:'', roomPassword:'',
             joinedPlayers: []
         });
 
         db.ref('tournamentsDB').set(tournaments);
         alert("Match launched by staff!");
+        
+        document.getElementById('staffMatchTitle').value = '';
+        document.getElementById('staffMatchPrize1st').value = '';
+        document.getElementById('staffMatchPrize2nd').value = '';
+        document.getElementById('staffMatchPrize3rd').value = '';
+        document.getElementById('staffMatchPerKill').value = '';
+
         renderStaffTournaments();
         populateWinnerMatchDropdowns();
     }
@@ -1705,7 +1806,6 @@
         if(!t) return;
 
         if(confirm(`Are you sure you want to cancel/delete "${t.title}"?\nAll joined players (${(t.joinedPlayers||[]).length}) will get an AUTOMATIC COIN REFUND!`)) {
-            
             let refundedCount = 0;
             if(t.joinedPlayers && t.joinedPlayers.length > 0 && t.fee > 0) {
                 t.joinedPlayers.forEach(pUid => {
@@ -1720,116 +1820,131 @@
             tournaments = tournaments.filter(x => x && x.id !== id);
             db.ref('tournamentsDB').set(tournaments);
 
-            alert(`Match cancelled successfully!\nAutomatic refund completed for ${refundedCount} players (${t.fee} coins each refunded).`);
-            
+            alert(`Match cancelled successfully!\nAutomatic refund completed for ${refundedCount} players.`);
             if(isAdmin) renderAdminTournaments(); else renderStaffTournaments();
             populateWinnerMatchDropdowns();
         }
     }
 
     function transferCoins() {
-        if(!currentUser) return alert("Please login first!");
-        const targetUID = prompt("Enter Receiver Player UID:");
-        if(!targetUID || !accountsDB[targetUID]) return alert("Invalid Player UID!");
-        if(targetUID === currentUser.uid) return alert("Cannot send coins to yourself!");
-        
-        const amount = parseInt(prompt("Enter Amount of Coins to Send:"));
-        if(isNaN(amount) || amount <= 0) return alert("Invalid Amount!");
-        if(accountsDB[currentUser.uid].coins < amount) return alert("Insufficient Coins!");
+        const recipientUID = prompt("Enter Recipient Player UID:");
+        if(!recipientUID) return;
+        const recipient = accountsDB[recipientUID.trim()];
+        if(!recipient) return alert("Recipient UID not found!");
+        if(recipient.uid === currentUser.uid) return alert("You cannot transfer coins to yourself!");
+
+        const amountStr = prompt(`Transfer coins to ${recipient.name} (UID: ${recipient.uid}).\nEnter Amount:`);
+        const amount = parseInt(amountStr);
+        if(isNaN(amount) || amount <= 0) return alert("Invalid amount!");
+        if(accountsDB[currentUser.uid].coins < amount) return alert("Insufficient coins!");
 
         accountsDB[currentUser.uid].coins -= amount;
-        accountsDB[targetUID].coins = (accountsDB[targetUID].coins || 0) + amount;
-        
-        db.ref('accountsDB/' + currentUser.uid).update({ coins: accountsDB[currentUser.uid].coins });
-        db.ref('accountsDB/' + targetUID).update({ coins: accountsDB[targetUID].coins });
+        recipient.coins = (recipient.coins || 0) + amount;
 
-        document.getElementById('userCoins').innerText = accountsDB[currentUser.uid].coins;
-        alert(`Successfully transferred ${amount} coins to ${accountsDB[targetUID].name}!`);
+        db.ref('accountsDB/' + currentUser.uid).update({ coins: accountsDB[currentUser.uid].coins });
+        db.ref('accountsDB/' + recipient.uid).update({ coins: recipient.coins });
+
+        alert(`Successfully transferred ${amount} coins to ${recipient.name}!`);
     }
 
     function changeUserPassword() {
-        if(!currentUser) return alert("Please login first!");
         const oldPass = document.getElementById('oldUserPass').value.trim();
         const newPass = document.getElementById('newUserPass').value.trim();
-        if(oldPass !== currentUser.password) return alert("Incorrect current password!");
-        if(!newPass) return alert("Enter a valid new password!");
+        if(!oldPass || !newPass) return alert("Please enter both current and new password!");
+        if(accountsDB[currentUser.uid].password !== oldPass) return alert("Current password incorrect!");
 
-        currentUser.password = newPass;
         accountsDB[currentUser.uid].password = newPass;
         db.ref('accountsDB/' + currentUser.uid).update({ password: newPass });
         alert("Password updated successfully!");
+        document.getElementById('oldUserPass').value = '';
+        document.getElementById('newUserPass').value = '';
         showScreen('homeScreen');
     }
 
     function changeAdminPassword() {
         const newPass = document.getElementById('newAdminPass').value.trim();
-        if(!newPass) return alert("Enter valid password!");
+        if(!newPass) return alert("Enter new admin password!");
         adminPass = newPass;
         db.ref('adminPasswordDB').set(adminPass);
-        alert("Admin password changed successfully!");
+        alert("Admin password updated successfully!");
+        document.getElementById('newAdminPass').value = '';
     }
 
-    function managePlayerStatus(ban) {
+    function managePlayerStatus(banStatus) {
         const uid = document.getElementById('banTargetUID').value.trim();
-        if(!accountsDB[uid]) return alert("Player UID not found!");
-        accountsDB[uid].isBanned = ban;
-        db.ref('accountsDB/' + uid).update({ isBanned: ban });
-        alert(`Player UID ${uid} has been ${ban ? 'BANNED' : 'UNBANNED'} successfully!`);
+        if(!uid || !accountsDB[uid]) return alert("Valid Player UID required!");
+        accountsDB[uid].isBanned = banStatus;
+        db.ref('accountsDB/' + uid).update({ isBanned: banStatus });
+        alert(`Player ${accountsDB[uid].name} (${uid}) ${banStatus ? 'BANNED' : 'UNBANNED'} successfully!`);
+        document.getElementById('banTargetUID').value = '';
     }
 
-    function adminModifyCoins(type) {
+    function adminModifyCoins(action) {
         const uid = document.getElementById('adminTargetUID').value.trim();
         const amount = parseInt(document.getElementById('adminCoinAmount').value);
-        if(!accountsDB[uid]) return alert("Player UID not found!");
-        if(isNaN(amount) || amount <= 0) return alert("Enter valid coin amount!");
+        if(!uid || !accountsDB[uid] || isNaN(amount) || amount <= 0) return alert("Enter valid UID and positive coin amount!");
 
-        if(type === 'add') accountsDB[uid].coins = (accountsDB[uid].coins || 0) + amount;
-        else accountsDB[uid].coins = Math.max(0, (accountsDB[uid].coins || 0) - amount);
+        if(action === 'add') {
+            accountsDB[uid].coins = (accountsDB[uid].coins || 0) + amount;
+        } else {
+            accountsDB[uid].coins = Math.max(0, (accountsDB[uid].coins || 0) - amount);
+        }
 
         db.ref('accountsDB/' + uid).update({ coins: accountsDB[uid].coins });
-        alert(`Successfully ${type === 'add' ? 'added' : 'deducted'} ${amount} coins for UID: ${uid}`);
+        alert(`Successfully ${action === 'add' ? 'added' : 'deducted'} ${amount} coins for ${accountsDB[uid].name}!`);
+        document.getElementById('adminTargetUID').value = '';
+        document.getElementById('adminCoinAmount').value = '';
     }
 
-    function adminModifyCoinsFromStaff(type) {
+    function adminModifyCoinsFromStaff(action) {
         const uid = document.getElementById('adminTargetUID2').value.trim();
         const amount = parseInt(document.getElementById('adminCoinAmount2').value);
-        if(!accountsDB[uid]) return alert("Player UID not found!");
-        if(isNaN(amount) || amount <= 0) return alert("Enter valid amount!");
+        if(!uid || !accountsDB[uid] || isNaN(amount) || amount <= 0) return alert("Enter valid UID and amount!");
 
-        if(type === 'add') accountsDB[uid].coins = (accountsDB[uid].coins || 0) + amount;
-        else accountsDB[uid].coins = Math.max(0, (accountsDB[uid].coins || 0) - amount);
+        if(action === 'add') {
+            accountsDB[uid].coins = (accountsDB[uid].coins || 0) + amount;
+        } else {
+            accountsDB[uid].coins = Math.max(0, (accountsDB[uid].coins || 0) - amount);
+        }
 
         db.ref('accountsDB/' + uid).update({ coins: accountsDB[uid].coins });
-        alert(`Coins updated for UID: ${uid}`);
+        alert(`Coins updated for ${accountsDB[uid].name}!`);
+        document.getElementById('adminTargetUID2').value = '';
+        document.getElementById('adminCoinAmount2').value = '';
     }
 
     function renderLeaderboard() {
         const container = document.getElementById('playerLeaderboardList');
         if(!container) return;
         container.innerHTML = '';
-        
-        if(winnersDB.length === 0) {
-            container.innerHTML = '<div style="color:var(--text-gray); font-size:12px; text-align:center;">No recent match winners announced yet.</div>';
-            return;
-        }
 
-        winnersDB.slice(0, 5).forEach((w, index) => {
-            if(!w) return;
-            const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🎗️';
-            container.innerHTML += `
-                <div class="leaderboard-item">
-                    <div>
-                        <span class="rank-badge">${medal}</span>
-                        <b>${w.name}</b> <span style="font-size:11px; color:var(--text-gray);">(UID: ${w.uid})</span>
+        if(winnersDB.length > 0) {
+            winnersDB.slice(0, 5).forEach((w, idx) => {
+                const badge = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx+1}`;
+                container.innerHTML += `
+                    <div class="leaderboard-item">
+                        <span><span class="rank-badge">${badge}</span> <b>${w.name}</b> (${w.matchTitle})</span>
+                        <span style="color:var(--gold); font-weight:bold;">+${w.prize} 🪙</span>
                     </div>
-                    <div style="color:var(--gold); font-weight:bold;">
-                        +${w.prize} 🪙
+                `;
+            });
+        } else {
+            const players = Object.values(accountsDB).sort((a,b) => (b.coins||0) - (a.coins||0)).slice(0, 5);
+            if(players.length === 0) {
+                container.innerHTML = '<div style="color:var(--text-gray); font-size:12px;">No leaderboard data available.</div>';
+                return;
+            }
+            players.forEach((p, idx) => {
+                const badge = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx+1}`;
+                container.innerHTML += `
+                    <div class="leaderboard-item">
+                        <span><span class="rank-badge">${badge}</span> <b>${p.name}</b></span>
+                        <span style="color:var(--gold); font-weight:bold;">${p.coins || 0} 🪙</span>
                     </div>
-                </div>
-            `;
-        });
+                `;
+            });
+        }
     }
 </script>
-
 </body>
 </html>
